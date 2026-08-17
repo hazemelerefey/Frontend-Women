@@ -17,58 +17,42 @@ export default function HeroSection() {
     // Subtle idle drift of the model
     gsap.to('.main-screen__image', { x: -6, duration: 6 });
 
-    // === Creative exit: star-iris transition ===
-    // The hero pins at its end. While pinned:
-    //  - "FRONTEND" and "WOMAN" split apart like a gate (left / right)
-    //  - the model sinks and scales slightly, the gradient dims
-    //  - the About section is revealed THROUGH an expanding star mask
-    //    (same four-pointed star as the grid transition), not a plain slide
+    // === Layered exit ===
+    // Phase 1: titles split apart and FADE, nav + bottom bar fade — the
+    //          portrait is left alone on the gradient, gently zooming in.
+    // Phase 2: the portrait itself fades out while still zooming.
+    // Phase 3: the hero (now an empty dimmed gradient) stays pinned and the
+    //          About section scrolls over it — clean layer over layer.
     gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'bottom bottom',
-        end: '+=700',
+        end: '+=900',
         scrub: 1,
         pin: true,
         pinSpacing: false,
       }
     })
-    // Title gate-split
-    .to('.main-screen__title-line-1', { xPercent: -22, opacity: 0, ease: 'power1.in', duration: 0.7 }, 0)
-    .to('.main-screen__title-line-2', { xPercent: 22, opacity: 0, ease: 'power1.in', duration: 0.7 }, 0)
-    .to('.main-screen__nav', { opacity: 0, duration: 0.4 }, 0)
-    .to('.main-screen__bottom', { opacity: 0, y: 30, duration: 0.4 }, 0)
-    // Model sinks away, gradient dims
-    .to('.main-screen__image', { yPercent: 12, scale: 1.06, opacity: 0.5, duration: 0.8 }, 0)
-    .to('.main-screen__gsap-bg', { opacity: 0.4, duration: 0.8 }, 0)
-    // Star-iris reveal of the About section
-    .fromTo('.about',
-      {
-        WebkitMaskImage: 'url(/images/svg/star.svg)',
-        maskImage: 'url(/images/svg/star.svg)',
-        WebkitMaskRepeat: 'no-repeat',
-        maskRepeat: 'no-repeat',
-        WebkitMaskPosition: '50% 6%',
-        maskPosition: '50% 6%',
-        WebkitMaskSize: '0%',
-        maskSize: '0%',
-      },
-      {
-        WebkitMaskSize: '1200%',
-        maskSize: '1200%',
-        ease: 'power1.in',
-        duration: 1,
-      }, 0)
-    // About content settles in while the star opens
+    // Phase 1 — texts fade (titles split softly while fading)
+    .to('.main-screen__title-line-1', { xPercent: -10, opacity: 0, ease: 'power1.out', duration: 0.3 }, 0)
+    .to('.main-screen__title-line-2', { xPercent: 10, opacity: 0, ease: 'power1.out', duration: 0.3 }, 0)
+    .to('.main-screen__nav', { opacity: 0, duration: 0.2 }, 0)
+    .to('.main-screen__bottom', { opacity: 0, duration: 0.25 }, 0)
+    // Portrait solo moment — slow continuous zoom across the whole pin
+    .to('.main-screen__image', { scale: 1.12, ease: 'none', duration: 1 }, 0)
+    // Phase 2 — portrait fades out to hidden
+    .to('.main-screen__image', { opacity: 0, ease: 'power1.inOut', duration: 0.35 }, 0.45)
+    .to('.main-screen__gsap-bg', { opacity: 0.35, duration: 0.4 }, 0.5)
+    // Phase 3 — About content settles in as its layer rises over the hero
     .fromTo('.about .simple-title, .about .features',
       { opacity: 0 },
-      { opacity: 1, delay: 0.4, duration: 0.6 }, 0)
+      { opacity: 1, duration: 0.3 }, 0.6)
     .fromTo('.about__card:nth-child(2n-1)',
       { opacity: 0, y: 80 },
-      { opacity: 1, y: 0, delay: 0.4, duration: 0.6 }, 0)
+      { opacity: 1, y: 0, duration: 0.3 }, 0.6)
     .fromTo('.about__card:nth-child(2n)',
       { opacity: 0, y: 80 },
-      { opacity: 1, y: 0, delay: 0.5, duration: 0.55 }, 0);
+      { opacity: 1, y: 0, duration: 0.3 }, 0.7);
 
   });
 
