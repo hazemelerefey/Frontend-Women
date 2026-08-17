@@ -36,22 +36,18 @@ const freelancerItems = [
   'Headaches',
 ];
 
-const swapLabels = ['IDEAS', 'HOURS', 'BUGS'];
+const swapLabels = ['BAGS', 'IDEAS'];
 
 export default function CompareSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const leftCardRef = useRef<HTMLDivElement>(null);
-  const rightCardRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const [swapIdx, setSwapIdx] = useState(0);
   const [activeRow, setActiveRow] = useState<number | null>(null);
   const [hoverRow, setHoverRow] = useState<number | null>(null);
 
   useGSAP(() => {
-    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-
-    // Scroll-driven row activation: as each row pair crosses the center of
-    // the viewport it becomes the highlighted row (not click/hover-driven).
+    // Scroll-driven row activation: the row pair crossing viewport center
+    // becomes the highlighted one.
     const rows = gsap.utils.toArray<HTMLElement>('.compare__row--left');
     rows.forEach((row, idx) => {
       ScrollTrigger.create({
@@ -63,11 +59,11 @@ export default function CompareSection() {
       });
     });
 
-    // Badge counter counts up to 89 while scrolling through the lists,
-    // and the label flips between words as progress advances.
-    const counterState = { value: 0 };
+    // Badge counter counts 28 -> 99 while scrolling through the lists
+    // (same range as the original), and the label flips BAGS -> IDEAS.
+    const counterState = { value: 28 };
     gsap.to(counterState, {
-      value: 89,
+      value: 99,
       ease: 'none',
       scrollTrigger: {
         trigger: sectionRef.current,
@@ -75,7 +71,7 @@ export default function CompareSection() {
         end: 'bottom bottom',
         scrub: 1,
         onUpdate: (self) => {
-          setSwapIdx(Math.min(swapLabels.length - 1, Math.floor(self.progress * swapLabels.length)));
+          setSwapIdx(self.progress > 0.5 ? 1 : 0);
         },
       },
       onUpdate: () => {
@@ -84,53 +80,18 @@ export default function CompareSection() {
         }
       },
     });
-
-    if (!isDesktop) return;
-
-    // 3D tilt effect on mousemove across each card
-    const setupTilt = (element: HTMLElement | null) => {
-      if (!element) return;
-      const handleMove = (e: MouseEvent) => {
-        const rect = element.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const rotY = (x / rect.width - 0.5) * 8;
-        const rotX = (y / rect.height - 0.5) * -8;
-
-        gsap.to(element, {
-          rotationX: rotX,
-          rotationY: rotY,
-          ease: 'power2.out',
-          duration: 0.4,
-          transformPerspective: 1400,
-        });
-      };
-
-      const handleLeave = () => {
-        gsap.to(element, { rotationX: 0, rotationY: 0, ease: 'power2.out', duration: 0.5 });
-      };
-
-      element.addEventListener('mousemove', handleMove);
-      element.addEventListener('mouseleave', handleLeave);
-    };
-
-    setupTilt(leftCardRef.current);
-    setupTilt(rightCardRef.current);
-
   }, { scope: sectionRef });
 
   const highlight = hoverRow ?? activeRow;
 
-  const rowStyle = (idx: number): React.CSSProperties => ({
-    fontSize: highlight === idx ? 'clamp(2.2rem, 2.6vw, 3.4rem)' : 'clamp(1.8rem, 2vw, 2.4rem)',
-    fontWeight: highlight === idx ? 800 : 500,
+  const rowStyle = (idx: number, side: 'left' | 'right'): React.CSSProperties => ({
+    fontSize: highlight === idx ? 'clamp(2.4rem, 2.8vw, 3.6rem)' : 'clamp(1.9rem, 2.1vw, 2.6rem)',
+    fontWeight: 500,
     letterSpacing: '-0.02em',
     lineHeight: 1.15,
-    borderBottom: '1px solid rgba(0,0,0,0.1)',
-    paddingBottom: '1.2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderBottom: '1px solid rgba(0,0,0,0.12)',
+    padding: '1.8rem 0',
+    textAlign: side === 'left' ? 'right' : 'left',
     cursor: 'pointer',
     opacity: highlight === null || highlight === idx ? 1 : 0.45,
     transition: 'all 0.25s ease',
@@ -164,112 +125,96 @@ export default function CompareSection() {
           }}
         />
 
-        {/* Compare Content (Side-by-Side 2 Cards with Center Sticky Badge) */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '1.6rem',
-            position: 'relative',
-          }}
-          className="compare-grid"
-        >
-          {/* Left Column: SHAHD (Sky Blue) */}
+        {/* One split card: blue half (SHAHD) / lavender half (FREELANCER),
+            rows anchored toward the center seam, side labels at the edges,
+            dark circular counter badge riding the seam. */}
+        <div className="compare-grid" style={{ position: 'relative' }}>
           <div
-            ref={leftCardRef}
             style={{
-              background: 'linear-gradient(180deg, #94bdf7 0%, #a4cdf8 100%)',
-              borderRadius: '2.4rem',
-              padding: '6rem 5rem 6rem 6rem',
-              color: '#000',
-              position: 'relative',
-              boxShadow: '0 2rem 5rem rgba(0,0,0,0.3)',
-              transformStyle: 'preserve-3d',
-              transition: 'box-shadow 0.3s ease',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '0.6rem',
             }}
+            className="compare-grid__inner"
           >
-            {/* Header: SHAHD */}
+            {/* Left half: SHAHD */}
             <div
+              className="compare__half"
               style={{
-                fontSize: 'clamp(2.4rem, 3.5vw, 4.2rem)',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '-0.02em',
-                marginBottom: '4rem',
-                display: 'flex',
-                justifyContent: 'space-between',
+                background: 'linear-gradient(180deg, #94bdf7 0%, #a8c4f8 100%)',
+                borderRadius: '1.2rem 0 0 1.2rem',
+                padding: '6rem 0 6rem 3rem',
+                color: '#000',
+                display: 'grid',
+                gridTemplateColumns: '10rem 1fr',
                 alignItems: 'center',
               }}
             >
-              <span>SHAHD</span>
-              <span style={{ fontSize: '1.4rem', fontWeight: 700, opacity: 0.5, letterSpacing: '0.04em' }}>POSITIVE</span>
+              <div
+                style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                SHAHD
+              </div>
+              <div style={{ paddingRight: '10rem' }}>
+                {shahdItems.map((item, idx) => (
+                  <div
+                    key={item}
+                    className="compare__row--left"
+                    onMouseEnter={() => setHoverRow(idx)}
+                    onMouseLeave={() => setHoverRow(null)}
+                    style={rowStyle(idx, 'left')}
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6rem' }}>
-              {shahdItems.map((item, idx) => (
-                <div
-                  key={item}
-                  className="compare__row--left"
-                  onMouseEnter={() => setHoverRow(idx)}
-                  onMouseLeave={() => setHoverRow(null)}
-                  style={rowStyle(idx)}
-                >
-                  <span>{item}</span>
-                  <span style={{ fontSize: '1.4rem', opacity: highlight === idx ? 1 : 0.3 }}>✓</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Column: FREELANCER (Lavender) */}
-          <div
-            ref={rightCardRef}
-            style={{
-              background: 'linear-gradient(180deg, #d4bdf8 0%, #c4adf5 100%)',
-              borderRadius: '2.4rem',
-              padding: '6rem 6rem 6rem 5rem',
-              color: '#000',
-              position: 'relative',
-              boxShadow: '0 2rem 5rem rgba(0,0,0,0.3)',
-              transformStyle: 'preserve-3d',
-              transition: 'box-shadow 0.3s ease',
-            }}
-          >
-            {/* Header: FREELANCER */}
+            {/* Right half: FREELANCER */}
             <div
+              className="compare__half"
               style={{
-                fontSize: 'clamp(2.4rem, 3.5vw, 4.2rem)',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '-0.02em',
-                marginBottom: '4rem',
-                display: 'flex',
-                justifyContent: 'space-between',
+                background: 'linear-gradient(180deg, #d4bdf8 0%, #cdb2f6 100%)',
+                borderRadius: '0 1.2rem 1.2rem 0',
+                padding: '6rem 3rem 6rem 0',
+                color: '#000',
+                display: 'grid',
+                gridTemplateColumns: '1fr 10rem',
                 alignItems: 'center',
               }}
             >
-              <span>FREELANCER</span>
-              <span style={{ fontSize: '1.4rem', fontWeight: 700, opacity: 0.5, letterSpacing: '0.04em' }}>NEGATIVE</span>
-            </div>
-
-            {/* List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6rem' }}>
-              {freelancerItems.map((item, idx) => (
-                <div
-                  key={item}
-                  onMouseEnter={() => setHoverRow(idx)}
-                  onMouseLeave={() => setHoverRow(null)}
-                  style={rowStyle(idx)}
-                >
-                  <span>{item}</span>
-                  <span style={{ fontSize: '1.4rem', opacity: highlight === idx ? 1 : 0.3 }}>✕</span>
-                </div>
-              ))}
+              <div style={{ paddingLeft: '10rem' }}>
+                {freelancerItems.map((item, idx) => (
+                  <div
+                    key={item}
+                    onMouseEnter={() => setHoverRow(idx)}
+                    onMouseLeave={() => setHoverRow(null)}
+                    style={rowStyle(idx, 'right')}
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <div
+                style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  textAlign: 'right',
+                }}
+              >
+                FREELANCER
+              </div>
             </div>
           </div>
 
-          {/* Center Sticky Counter Badge — stays pinned while lists scroll */}
+          {/* Center counter badge — sticky, riding the seam */}
           <div
             className="compare__badge-col"
             style={{
@@ -285,24 +230,23 @@ export default function CompareSection() {
             <div
               style={{
                 position: 'sticky',
-                top: 'calc(50vh - 9rem)',
-                width: '18rem',
-                height: '18rem',
+                top: 'calc(50vh - 9.5rem)',
+                width: '19rem',
+                height: '19rem',
                 borderRadius: '50%',
-                backgroundColor: '#121214',
+                backgroundColor: '#141416',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.45)',
-                border: '2px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.5)',
               }}
             >
               <span 
                 style={{ 
-                  fontSize: '1.4rem', 
+                  fontSize: '1.5rem', 
                   fontWeight: 700, 
-                  letterSpacing: '0.06em', 
+                  letterSpacing: '0.08em', 
                   color: 'var(--gray)',
                   textTransform: 'uppercase',
                   marginBottom: '0.2rem',
@@ -314,14 +258,14 @@ export default function CompareSection() {
               <span 
                 ref={counterRef}
                 style={{ 
-                  fontSize: '6.2rem', 
-                  fontWeight: 800, 
+                  fontSize: '6.8rem', 
+                  fontWeight: 500, 
                   lineHeight: 1, 
-                  color: 'var(--sky)',
+                  color: 'var(--gray)',
                   letterSpacing: '-0.03em',
                 }}
               >
-                0
+                28
               </span>
             </div>
           </div>
@@ -332,8 +276,16 @@ export default function CompareSection() {
 
       <style>{`
         @media (max-width: 1023px) {
-          .compare-grid {
+          .compare-grid__inner {
             grid-template-columns: 1fr !important;
+          }
+          .compare__half {
+            grid-template-columns: 1fr !important;
+            border-radius: 1.2rem !important;
+            padding: 4rem 2.5rem !important;
+          }
+          .compare__half > div {
+            padding: 0 !important;
           }
           .compare__badge-col {
             display: none !important;

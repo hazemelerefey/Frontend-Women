@@ -186,58 +186,38 @@ export default function WorksSection() {
               </a>
             </div>
 
-            {/* Center Project Mockup Card */}
-            <div 
+            {/* Full-bleed project media covering the whole slide */}
+            <div
+              className="works__card"
               style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flex: 1,
-                width: '100%',
-                zIndex: 2,
+                position: 'absolute',
+                inset: 0,
+                zIndex: 1,
+                overflow: 'hidden',
               }}
             >
-              <div
-                className="works__card"
+              <video 
+                src={p.video} 
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
                 style={{
+                  position: 'absolute',
+                  inset: 0,
                   width: '100%',
-                  maxWidth: '72rem',
-                  aspectRatio: '16/10',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '0.5rem',
-                  padding: '18rem 6rem',
-                  boxShadow: '0 2.5rem 6rem rgba(0,0,0,0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  height: '100%',
+                  objectFit: 'cover',
                 }}
-              >
-                <div 
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '0.8rem',
-                    overflow: 'hidden',
-                    backgroundColor: '#000',
-                    position: 'relative',
-                  }}
-                >
-                  <video 
-                    src={p.video} 
-                    autoPlay 
-                    muted 
-                    loop 
-                    playsInline 
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                </div>
-              </div>
+              />
+              {/* Soft vignette so titles/tags stay legible */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.35) 100%)',
+                }}
+              />
             </div>
 
             {/* Bottom Metadata Tags Bar */}

@@ -70,56 +70,75 @@ export default function CalcSection() {
     >
       <div className="center-wrap" style={{ width: '100%' }}>
         
-        {/* Transitional Giant Headline */}
-        <div style={{ marginBottom: '8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {/* Row 1: Turn Loss Into */}
+        {/* Transitional Giant Headline — scattered word collage */}
+        <div style={{ marginBottom: '8rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Row 1: Let's ... Turn ... 10,560 */}
           <div 
             style={{ 
               display: 'flex', 
-              gap: '2.5rem', 
-              fontSize: 'clamp(4.5rem, 11vw, 15rem)', 
-              fontWeight: 700, 
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+              fontSize: 'clamp(4.5rem, 12vw, 17rem)', 
+              fontWeight: 400, 
               lineHeight: 0.85, 
               letterSpacing: '-0.03em',
-              textTransform: 'uppercase',
-              flexWrap: 'wrap',
             }}
           >
-            <span style={{ ...wordMask, color: 'var(--white)' }}><span className="calc__word" style={word}>Turn</span></span>
+            <span style={{ ...wordMask, color: 'var(--gray)' }}><span className="calc__word" style={word}>Let&apos;s</span></span>
+            <span style={{ ...wordMask, color: 'var(--gray)' }}><span className="calc__word" style={word}>Turn</span></span>
+            <span style={{ ...wordMask, color: 'var(--pink)' }}><span className="calc__word" style={word}>{calculatedSavings.toLocaleString()}</span></span>
+          </div>
+
+          {/* Row 2: USD ... Loss ... Into */}
+          <div 
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+              paddingLeft: '6vw',
+              paddingRight: '14vw',
+              fontSize: 'clamp(4.5rem, 12vw, 17rem)', 
+              fontWeight: 400, 
+              lineHeight: 0.85, 
+              letterSpacing: '-0.03em',
+            }}
+          >
+            <span style={{ ...wordMask, color: 'var(--pink)' }}><span className="calc__word" style={word}>USD</span></span>
             <span style={{ ...wordMask, color: 'var(--pink)' }}><span className="calc__word" style={word}>Loss</span></span>
             <span style={{ ...wordMask, color: 'var(--gray)' }}><span className="calc__word" style={word}>Into</span></span>
           </div>
 
-          {/* Row 2: Profit With */}
+          {/* Row 3: Profit ... With */}
           <div 
             style={{ 
               display: 'flex', 
-              gap: '2.5rem', 
-              fontSize: 'clamp(4.5rem, 11vw, 15rem)', 
-              fontWeight: 700, 
+              gap: '6vw',
+              alignItems: 'baseline',
+              fontSize: 'clamp(4.5rem, 12vw, 17rem)', 
+              fontWeight: 400, 
               lineHeight: 0.85, 
               letterSpacing: '-0.03em',
-              textTransform: 'uppercase',
-              color: 'var(--sky)',
             }}
           >
-            <span style={wordMask}><span className="calc__word" style={word}>Profit</span></span>
-            <span style={wordMask}><span className="calc__word" style={word}>With</span></span>
+            <span style={{ ...wordMask, color: 'var(--sky)' }}><span className="calc__word" style={word}>Profit</span></span>
+            <span style={{ ...wordMask, color: 'var(--gray)' }}><span className="calc__word" style={word}>With</span></span>
           </div>
 
-          {/* Row 3: Cost-effective Collab */}
+          {/* Row 4: Cost-effective Collab */}
           <div 
             style={{ 
               display: 'flex', 
-              fontSize: 'clamp(4.5rem, 11vw, 15rem)', 
-              fontWeight: 700, 
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+              fontSize: 'clamp(4.5rem, 12vw, 17rem)', 
+              fontWeight: 400, 
               lineHeight: 0.85, 
               letterSpacing: '-0.03em',
-              textTransform: 'uppercase',
               color: 'var(--sky)',
             }}
           >
-            <span style={wordMask}><span className="calc__word" style={word}>Cost-effective Collab</span></span>
+            <span style={wordMask}><span className="calc__word" style={word}>Cost-effective</span></span>
+            <span style={wordMask}><span className="calc__word" style={word}>Collab</span></span>
           </div>
         </div>
 
