@@ -1,8 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export default function ContactForm() {
+  const sectionRef = useRef<HTMLElement>(null);
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [topic, setTopic] = useState('Potential Project');
@@ -10,8 +16,28 @@ export default function ContactForm() {
   const [contactMethod, setContactMethod] = useState('Email');
   const [message, setMessage] = useState('');
 
+  useGSAP(() => {
+    gsap.fromTo(
+      '.contact__row',
+      { y: 70, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        stagger: 0.15,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 85%',
+          end: 'top 40%',
+          scrub: 1,
+        },
+      }
+    );
+  }, { scope: sectionRef });
+
   return (
     <section 
+      ref={sectionRef}
       id="contact" 
       style={{ 
         backgroundColor: 'var(--black)',
@@ -33,6 +59,7 @@ export default function ContactForm() {
         >
           {/* Conversational Line 1 */}
           <div 
+            className="contact__row"
             style={{ 
               fontSize: 'clamp(2rem, 3vw, 3.6rem)', 
               fontWeight: 500, 
@@ -45,7 +72,7 @@ export default function ContactForm() {
               color: '#d0d0d8',
             }}
           >
-            <span>Hey, Alina! My name is</span>
+            <span>Hey, Shahd! My name is</span>
             <input
               type="text"
               placeholder="Your Name"
@@ -85,6 +112,7 @@ export default function ContactForm() {
 
           {/* Line 2: Connect about options */}
           <div 
+            className="contact__row"
             style={{ 
               fontSize: 'clamp(2rem, 3vw, 3.6rem)', 
               fontWeight: 500, 
@@ -122,6 +150,7 @@ export default function ContactForm() {
 
           {/* Line 3: Contact info & Method */}
           <div 
+            className="contact__row"
             style={{ 
               fontSize: 'clamp(2rem, 3vw, 3.6rem)', 
               fontWeight: 500, 
@@ -178,6 +207,7 @@ export default function ContactForm() {
 
           {/* Line 4: In short message */}
           <div 
+            className="contact__row"
             style={{ 
               fontSize: 'clamp(2rem, 3vw, 3.6rem)', 
               fontWeight: 500, 
@@ -212,7 +242,7 @@ export default function ContactForm() {
           </div>
 
           {/* Submit Button */}
-          <div style={{ textAlign: 'center' }}>
+          <div className="contact__row" style={{ textAlign: 'center' }}>
             <button
               type="submit"
               style={{

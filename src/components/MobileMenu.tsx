@@ -109,7 +109,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       >
         <div style={{ display: 'flex', gap: '2rem' }}>
           <a
-            href="https://api.whatsapp.com/send?phone=380968037912"
+            href="https://wa.me/0000000000"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: 'var(--gray)', transition: 'color 0.2s' }}
@@ -119,7 +119,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <WhatsAppIcon />
           </a>
           <a
-            href="https://www.linkedin.com/in/alina-artydevs/"
+            href="https://www.linkedin.com/"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: 'var(--gray)', transition: 'color 0.2s' }}
@@ -130,7 +130,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </a>
         </div>
         <a
-          href="mailto:alina@frontend-w.com"
+          href="mailto:shahd@frontend-w.com"
           style={{
             fontSize: '1.4rem',
             color: 'var(--gray)',
@@ -140,7 +140,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--white)')}
           onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = 'var(--gray)')}
         >
-          alina@frontend-w.com
+          shahd@frontend-w.com
         </a>
       </div>
     </div>

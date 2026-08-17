@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import FeaturesBar from './FeaturesBar';
+import TitleReveal from './TitleReveal';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -52,17 +53,37 @@ export default function AboutSection() {
       });
     });
 
-    // Mission text slider timeline
+    // Mission text slider: pinned so the words flip while the viewer is held in place
     gsap.timeline({
       scrollTrigger: {
-        trigger: '.mission',
-        start: 'top 75%',
-        end: 'bottom 25%',
+        trigger: '.mission__giant',
+        start: 'center center',
+        end: '+=1000',
         scrub: true,
+        pin: true,
       },
     })
-    .to('.mission-slide-1', { yPercent: -100, opacity: 0 }, 0)
-    .fromTo('.mission-slide-2', { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1 }, 0);
+    .to('.mission-slide-1', { yPercent: -100, opacity: 0 }, 0.15)
+    .fromTo('.mission-slide-2', { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1 }, 0.15);
+
+    // Mission giant lines drift in from the sides as they enter
+    gsap.utils.toArray<HTMLElement>('.mission__row').forEach((row, i) => {
+      gsap.fromTo(
+        row,
+        { x: i % 2 === 0 ? 120 : -120, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: row,
+            start: 'top bottom',
+            end: 'center 70%',
+            scrub: 2,
+          },
+        }
+      );
+    });
 
   }, { scope: sectionRef });
 
@@ -81,8 +102,8 @@ export default function AboutSection() {
       <div className="center-wrap" style={{ width: '100%' }}>
         
         {/* Title */}
-        <h2 
-          className="simple-title" 
+        <TitleReveal
+          text="SIMPLY ABOUT"
           style={{ 
             fontSize: 'clamp(5rem, 20vw, 30.8rem)',
             lineHeight: 0.82,
@@ -92,9 +113,7 @@ export default function AboutSection() {
             marginBottom: '4rem',
             color: 'var(--gray)'
           }}
-        >
-          <span>SIMPLY ABOUT</span>
-        </h2>
+        />
 
         {/* Subheader Feature Row */}
         <div style={{ marginBottom: '15rem' }}>
@@ -258,10 +277,11 @@ export default function AboutSection() {
           </div>
 
           {/* Giant Typography Lines */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+          <div className="mission__giant" style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
             
             {/* Row 1: INCREASE YOUR */}
             <div 
+              className="mission__row"
               style={{ 
                 display: 'flex', 
                 justifyContent: 'flex-end', 
@@ -278,6 +298,7 @@ export default function AboutSection() {
 
             {/* Row 2: YOUR + SLIDER */}
             <div 
+              className="mission__row"
               style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
@@ -298,6 +319,7 @@ export default function AboutSection() {
 
             {/* Row 3: WITH */}
             <div 
+              className="mission__row"
               style={{ 
                 display: 'flex', 
                 justifyContent: 'flex-end', 
@@ -314,6 +336,7 @@ export default function AboutSection() {
 
             {/* Row 4: SLIDER */}
             <div 
+              className="mission__row"
               style={{ 
                 display: 'flex', 
                 fontSize: '21rem', 
@@ -331,6 +354,7 @@ export default function AboutSection() {
 
             {/* Row 5: DEVELOPMENT */}
             <div 
+              className="mission__row"
               style={{ 
                 display: 'flex', 
                 justifyContent: 'flex-end', 

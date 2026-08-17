@@ -14,17 +14,23 @@ export default function HeroSection() {
   useGSAP(() => {
     if (!sectionRef.current) return;
 
+    // Pin the hero at its end so the next section slides over it,
+    // while the hero content parallaxes and fades away.
     gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'bottom bottom',
-        end: 'bottom top',
-        scrub: true,
+        end: '+=700',
+        scrub: 1,
+        pin: true,
+        pinSpacing: false,
       }
     })
-    .to('.main-screen__title-line-1', { y: '-25%' }, 0)
-    .to('.main-screen__title-line-2', { y: '-15%' }, 0)
-    .to('.main-screen__image img', { y: '12%' }, 0);
+    .to('.main-screen__title-line-1', { y: '-35%', opacity: 0.4 }, 0)
+    .to('.main-screen__title-line-2', { y: '-20%', opacity: 0.4 }, 0)
+    .to('.main-screen__image img', { y: '14%', scale: 1.04 }, 0)
+    .to('.main-screen__bottom', { opacity: 0, y: 40 }, 0)
+    .to('.main-screen__gsap-bg', { opacity: 0.55 }, 0);
 
   }, { scope: sectionRef });
 
@@ -222,10 +228,17 @@ export default function HeroSection() {
             <span>UKRAINE — ORIGIN</span>
           </div>
 
-          {/* Center: Position */}
-          <div style={{ textAlign: 'center', fontWeight: 600, fontSize: '1.8rem', textTransform: 'none', lineHeight: 1.1 }}>
-            <span style={{ display: 'block', fontWeight: 600 }}>Webflow & Wordpress</span>
-            <span style={{ display: 'block', fontWeight: 400, opacity: 0.85 }}>for Designers</span>
+          {/* Center: Position (marquee) */}
+          <div className="main-screen__marquee marquee" style={{ maxWidth: '34rem', textTransform: 'none' }}>
+            <div className="marquee__track" style={{ fontSize: '1.8rem', lineHeight: 1.1 }}>
+              {[0, 1, 2, 3].map((i) => (
+                <span key={i} className="marquee__item">
+                  <span style={{ fontWeight: 600 }}>Webflow &amp; Wordpress</span>
+                  <span style={{ fontWeight: 400, opacity: 0.85 }}>for Designers</span>
+                  <span style={{ opacity: 0.4 }}>—</span>
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Right: Tech stack */}
