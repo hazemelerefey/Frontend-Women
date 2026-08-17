@@ -15,11 +15,14 @@ export default function HeroSection() {
     if (!sectionRef.current) return;
 
     // Subtle idle drift of the model
-    gsap.to('.main-screen__image', { x: -6, duration: 6 }, );
+    gsap.to('.main-screen__image', { x: -6, duration: 6 });
 
-    // Pin the hero at its end (no spacing) — the About section slides over it.
-    // During the pin, it is the INCOMING About content that animates:
-    // clip-path opens at the top, title/features fade in, cards rise staggered.
+    // === Creative exit: star-iris transition ===
+    // The hero pins at its end. While pinned:
+    //  - "FRONTEND" and "WOMAN" split apart like a gate (left / right)
+    //  - the model sinks and scales slightly, the gradient dims
+    //  - the About section is revealed THROUGH an expanding star mask
+    //    (same four-pointed star as the grid transition), not a plain slide
     gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
@@ -30,9 +33,33 @@ export default function HeroSection() {
         pinSpacing: false,
       }
     })
+    // Title gate-split
+    .to('.main-screen__title-line-1', { xPercent: -22, opacity: 0, ease: 'power1.in', duration: 0.7 }, 0)
+    .to('.main-screen__title-line-2', { xPercent: 22, opacity: 0, ease: 'power1.in', duration: 0.7 }, 0)
+    .to('.main-screen__nav', { opacity: 0, duration: 0.4 }, 0)
+    .to('.main-screen__bottom', { opacity: 0, y: 30, duration: 0.4 }, 0)
+    // Model sinks away, gradient dims
+    .to('.main-screen__image', { yPercent: 12, scale: 1.06, opacity: 0.5, duration: 0.8 }, 0)
+    .to('.main-screen__gsap-bg', { opacity: 0.4, duration: 0.8 }, 0)
+    // Star-iris reveal of the About section
     .fromTo('.about',
-      { clipPath: 'polygon(0 5%, 100% 5%, 100% 100%, 0 100%)' },
-      { clipPath: 'polygon(0 0%, 100% 0%, 100% 100%, 0 100%)', delay: 0.3, duration: 0.7 }, 0)
+      {
+        WebkitMaskImage: 'url(/images/svg/star.svg)',
+        maskImage: 'url(/images/svg/star.svg)',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskPosition: '50% 6%',
+        maskPosition: '50% 6%',
+        WebkitMaskSize: '0%',
+        maskSize: '0%',
+      },
+      {
+        WebkitMaskSize: '1200%',
+        maskSize: '1200%',
+        ease: 'power1.in',
+        duration: 1,
+      }, 0)
+    // About content settles in while the star opens
     .fromTo('.about .simple-title, .about .features',
       { opacity: 0 },
       { opacity: 1, delay: 0.4, duration: 0.6 }, 0)
@@ -136,7 +163,8 @@ export default function HeroSection() {
               fontSize: 'clamp(5rem, 17.5vw, 24rem)',
               lineHeight: 0.78,
               letterSpacing: '-0.03em',
-              color: 'var(--black)',
+              color: 'var(--white)',
+              textShadow: '0 0.4rem 6rem rgba(0, 0, 0, 0.45)',
               fontWeight: 800,
               textTransform: 'uppercase',
               margin: 0,
@@ -170,7 +198,7 @@ export default function HeroSection() {
                   fontSize: '1.5rem',
                   fontWeight: 600,
                   textTransform: 'uppercase',
-                  color: 'var(--black)',
+                  color: 'var(--white)',
                   textDecoration: 'none',
                   letterSpacing: '0.02em',
                   transition: 'opacity 0.2s',
@@ -191,7 +219,7 @@ export default function HeroSection() {
                 fontSize: '1.5rem',
                 fontWeight: 600,
                 textTransform: 'uppercase',
-                color: 'var(--black)',
+                color: 'var(--white)',
                 textDecoration: 'none',
                 letterSpacing: '0.02em',
               }}
@@ -208,7 +236,8 @@ export default function HeroSection() {
               fontSize: 'clamp(5rem, 17.5vw, 24rem)',
               lineHeight: 0.78,
               letterSpacing: '-0.03em',
-              color: 'var(--black)',
+              color: 'var(--white)',
+              textShadow: '0 0.4rem 6rem rgba(0, 0, 0, 0.45)',
               fontWeight: 800,
               textTransform: 'uppercase',
               margin: 0,
@@ -225,7 +254,7 @@ export default function HeroSection() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
-            color: 'var(--black)',
+            color: 'var(--white)',
             fontSize: '1.4rem',
             textTransform: 'uppercase',
             fontWeight: 600,
