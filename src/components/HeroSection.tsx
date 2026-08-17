@@ -14,8 +14,12 @@ export default function HeroSection() {
   useGSAP(() => {
     if (!sectionRef.current) return;
 
-    // Pin the hero at its end so the next section slides over it,
-    // while the hero content parallaxes and fades away.
+    // Subtle idle drift of the model
+    gsap.to('.main-screen__image', { x: -6, duration: 6 }, );
+
+    // Pin the hero at its end (no spacing) — the About section slides over it.
+    // During the pin, it is the INCOMING About content that animates:
+    // clip-path opens at the top, title/features fade in, cards rise staggered.
     gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
@@ -26,13 +30,20 @@ export default function HeroSection() {
         pinSpacing: false,
       }
     })
-    .to('.main-screen__title-line-1', { y: '-35%', opacity: 0.4 }, 0)
-    .to('.main-screen__title-line-2', { y: '-20%', opacity: 0.4 }, 0)
-    .to('.main-screen__image img', { y: '14%', scale: 1.04 }, 0)
-    .to('.main-screen__bottom', { opacity: 0, y: 40 }, 0)
-    .to('.main-screen__gsap-bg', { opacity: 0.55 }, 0);
+    .fromTo('.about',
+      { clipPath: 'polygon(0 5%, 100% 5%, 100% 100%, 0 100%)' },
+      { clipPath: 'polygon(0 0%, 100% 0%, 100% 100%, 0 100%)', delay: 0.3, duration: 0.7 }, 0)
+    .fromTo('.about .simple-title, .about .features',
+      { opacity: 0 },
+      { opacity: 1, delay: 0.4, duration: 0.6 }, 0)
+    .fromTo('.about__card:nth-child(2n-1)',
+      { opacity: 0, y: 80 },
+      { opacity: 1, y: 0, delay: 0.4, duration: 0.6 }, 0)
+    .fromTo('.about__card:nth-child(2n)',
+      { opacity: 0, y: 80 },
+      { opacity: 1, y: 0, delay: 0.5, duration: 0.55 }, 0);
 
-  }, { scope: sectionRef });
+  });
 
   return (
     <section 
