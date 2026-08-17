@@ -1,0 +1,20 @@
+services:
+  site:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      network: host
+    network_mode: host
+    working_dir: /app
+    environment:
+      IS_ALLOY: ${IS_ALLOY:-true}
+      NEXT_TELEMETRY_DISABLED: "1"
+    volumes:
+      - .:/app
+      - alloy_node_modules:/app/node_modules
+      - alloy_next:/app/.next
+    command: npm run dev -- --hostname 0.0.0.0 --port 3000
+
+volumes:
+  alloy_node_modules:
+  alloy_next:
