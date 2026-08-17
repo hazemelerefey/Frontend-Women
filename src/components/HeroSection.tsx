@@ -88,7 +88,7 @@ export default function HeroSection() {
         }}
       >
         <Image 
-          src="/images/hero-woman.webp" 
+          src="/images/woman2.webp" 
           alt="Frontend Woman" 
           width={800} 
           height={1200}

@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { CloseIcon, WhatsAppIcon, LinkedInIcon } from './icons';
 
 const navLinks = [
@@ -49,8 +48,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           <Image
             src="/images/mobile_logo.svg"
             alt="logo"
-            width={140}
-            height={30}
+            width={48}
+            height={48}
             style={{ filter: 'invert(0)' }}
           />
         </a>
