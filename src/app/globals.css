@@ -237,6 +237,100 @@ body {
   border-width: 0;
 }
 
+/* ============ Motion utilities ============ */
+
+@keyframes marquee-loop {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.marquee__track {
+  display: inline-flex;
+  align-items: baseline;
+  animation: marquee-loop 22s linear infinite;
+  will-change: transform;
+}
+
+.marquee__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  padding-right: 0.7em;
+}
+
+/* Letter-split reveal: each letter slides up from a masked line */
+.split-line {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.split-line .split-letter {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Letter wave on hover (footer / nav links) */
+.wave-link {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.wave-link .split-letter {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wave-link:hover .split-letter {
+  transform: translateY(-0.18em);
+}
+
+.wave-link .split-letter:nth-child(2n) { transition-delay: 0.02s; }
+.wave-link .split-letter:nth-child(3n) { transition-delay: 0.045s; }
+.wave-link .split-letter:nth-child(4n) { transition-delay: 0.065s; }
+.wave-link .split-letter:nth-child(5n) { transition-delay: 0.085s; }
+
+/* Range slider skin to match dark cards */
+input[type='range'].calc-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 2px;
+  outline: none;
+}
+
+input[type='range'].calc-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--white);
+  border: none;
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+input[type='range'].calc-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type='range'].calc-range::-moz-range-thumb {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--white);
+  border: none;
+  cursor: grab;
+}
+
 @media (min-width: 1024px) {
   .desktop--hide {
     display: none !important;

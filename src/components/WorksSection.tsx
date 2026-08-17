@@ -13,7 +13,7 @@ const projects = [
     id: 1,
     title: "JOIN.MYSTIC",
     link: 'https://joinmystic.com',
-    video: '/videos/mystic.mp4',
+    video: '/videos/work-video2.mp4',
     bg: '#150c21',
     tags: ['MYSTIC', 'READINGS'],
     year: '©2025',
@@ -22,7 +22,7 @@ const projects = [
     id: 2,
     title: 'ailit.rail',
     link: 'https://ailit-rail.webflow.io/',
-    video: '/videos/train.webm',
+    video: '/videos/trains.mp4',
     bg: '#e18066',
     tags: ['SPEED', 'COMFORT'],
     year: '©2025',
@@ -31,7 +31,7 @@ const projects = [
     id: 3,
     title: 'toggle.studio',
     link: 'https://www.toggle-studio.com/',
-    video: '/videos/toggle.webm',
+    video: '/videos/toggle.mp4',
     bg: '#ffffff',
     tags: ['THINK', 'DIFFERENT'],
     year: '©2025',
@@ -51,17 +51,55 @@ export default function WorksSection() {
     if (!container || !sectionRef.current) return;
 
     // Pinned Horizontal Scroll
-      gsap.to(items, {
-        xPercent: -100 * (items.length - 1),
+    const horizontalTween = gsap.to(items, {
+      xPercent: -100 * (items.length - 1),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        pin: true,
+        scrub: 0.7,
+        end: () => `+=${window.innerWidth * 2.5}`,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    // Per-item card scale/parallax driven by the horizontal container animation
+    items.forEach((item) => {
+      const card = (item as HTMLElement).querySelector('.works__card');
+      if (!card) return;
+      gsap.fromTo(
+        card,
+        { scale: 0.82, rotate: 2 },
+        {
+          scale: 1,
+          rotate: 0,
+          ease: 'none',
+          scrollTrigger: {
+            containerAnimation: horizontalTween,
+            trigger: item as HTMLElement,
+            start: 'left 90%',
+            end: 'left 20%',
+            scrub: true,
+          },
+        }
+      );
+    });
+
+    // Scrub-driven marquee strip after the works list
+    gsap.fromTo(
+      '.works__marquee-inner',
+      { x: '6%' },
+      {
+        x: '-6%',
         ease: 'none',
         scrollTrigger: {
-          trigger: sectionRef.current,
-          pin: true,
-          scrub: 0.7,
-          end: () => `+=${window.innerWidth * 2.5}`,
-          invalidateOnRefresh: true,
+          trigger: '.works__marquee',
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1,
         },
-      });
+      }
+    );
 
     // Mouse movement title float
     const titles = gsap.utils.toArray('.works__title-link');
@@ -160,6 +198,7 @@ export default function WorksSection() {
               }}
             >
               <div
+                className="works__card"
                 style={{
                   width: '100%',
                   maxWidth: '72rem',
@@ -228,12 +267,14 @@ export default function WorksSection() {
         ))}
       </div>
 
-      <div className="center-wrap" style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--black)', padding: '5rem 0' }}>
-        <FeaturesBar 
-          title="©2025" 
-          items={['THINK', 'DIFFERENT', 'STAY HUNGRY']} 
-          reverse={true}
-        />
+      <div className="works__marquee center-wrap" style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--black)', padding: '5rem 0', overflow: 'hidden' }}>
+        <div className="works__marquee-inner">
+          <FeaturesBar 
+            title="©2025" 
+            items={['THINK', 'DIFFERENT', 'STAY HUNGRY']} 
+            reverse={true}
+          />
+        </div>
       </div>
       
       <style>{`

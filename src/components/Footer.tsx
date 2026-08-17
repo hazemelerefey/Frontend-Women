@@ -1,8 +1,39 @@
 'use client';
 
+import { useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import SplitLetters from './SplitLetters';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
 export default function Footer() {
+  const footerRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const letters = footerRef.current?.querySelectorAll('.footer-title .split-letter');
+    if (!letters?.length) return;
+    gsap.fromTo(
+      letters,
+      { yPercent: 110 },
+      {
+        yPercent: 0,
+        stagger: 0.03,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.footer-title',
+          start: 'top bottom',
+          end: 'bottom bottom',
+          scrub: 2,
+        },
+      }
+    );
+  }, { scope: footerRef });
+
   return (
     <footer
+      ref={footerRef}
       id="footer"
       style={{
         backgroundColor: 'var(--black)',
@@ -16,7 +47,7 @@ export default function Footer() {
         
         {/* Giant Footer Title */}
         <h2 
-          className="simple-title" 
+          className="simple-title footer-title" 
           style={{ 
             fontSize: 'clamp(5rem, 15.5vw, 21.5rem)', 
             lineHeight: 0.85, 
@@ -26,9 +57,12 @@ export default function Footer() {
             letterSpacing: '-0.03em',
             color: 'var(--white)',
             marginBottom: '4rem',
+            display: 'block',
           }}
         >
-          <span>FRONTEND WOMAN</span>
+          <span className="split-line">
+            <SplitLetters text="FRONTEND WOMAN" />
+          </span>
         </h2>
 
         {/* Footer Bottom Row */}
@@ -48,16 +82,13 @@ export default function Footer() {
         >
           {/* Left: Email */}
           <a
-            href="mailto:alina@frontend-w.com"
-            style={{
-              color: 'var(--gray)',
-              textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
+            href="mailto:shahd@frontend-w.com"
+            className="wave-link"
+            style={{ color: 'var(--gray)' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--gray)')}
           >
-            ALINA@FRONTEND-W.COM
+            <SplitLetters text="SHAHD@FRONTEND-W.COM" />
           </a>
 
           {/* Center: Nav links */}
@@ -71,15 +102,12 @@ export default function Footer() {
               <a
                 key={link.label}
                 href={link.href}
-                style={{
-                  color: 'var(--gray)',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s',
-                }}
+                className="wave-link"
+                style={{ color: 'var(--gray)', transition: 'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--gray)')}
               >
-                {link.label}
+                <SplitLetters text={link.label} />
               </a>
             ))}
           </nav>
@@ -91,18 +119,20 @@ export default function Footer() {
               href="https://nadnova.com/"
               target="_blank"
               rel="noreferrer"
-              style={{ color: '#fff', textDecoration: 'none' }}
+              className="wave-link"
+              style={{ color: '#fff' }}
             >
-              NADNOVA
+              <SplitLetters text="NADNOVA" />
             </a>
             <span>x</span>
             <a
               href="https://www.behance.net/nowordstudio"
               target="_blank"
               rel="noreferrer"
-              style={{ color: '#fff', textDecoration: 'none' }}
+              className="wave-link"
+              style={{ color: '#fff' }}
             >
-              NOWORD
+              <SplitLetters text="NOWORD" />
             </a>
           </div>
         </div>

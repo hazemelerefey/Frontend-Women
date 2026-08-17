@@ -1,18 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export default function CalcSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const [rate, setRate] = useState(30);
   const [hours, setHours] = useState(80);
+
+  useGSAP(() => {
+    // Giant headline words rise out of their masks, scrubbed by scroll
+    gsap.fromTo(
+      '.calc__word',
+      { yPercent: 110 },
+      {
+        yPercent: 0,
+        stagger: 0.08,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end: 'center center',
+          scrub: true,
+        },
+      }
+    );
+
+    // Cards fade-slide in
+    gsap.fromTo(
+      '.calc-grid > div',
+      { y: 90, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        stagger: 0.12,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.calc-grid',
+          start: 'top 92%',
+          end: 'top 55%',
+          scrub: 1,
+        },
+      }
+    );
+  }, { scope: sectionRef });
 
   // Exact formula matching scraped frontend-w.com script
   const calculatedSavings = Math.round(
     Math.max(0, ((1.23 - 0.006 * (rate - 25)) * rate - 25) * hours * 12)
   );
 
+  const wordMask: React.CSSProperties = { display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom' };
+  const word: React.CSSProperties = { display: 'inline-block' };
+
   return (
     <section 
+      ref={sectionRef}
       id="calc" 
       style={{ 
         backgroundColor: 'var(--black)',
@@ -38,9 +85,9 @@ export default function CalcSection() {
               flexWrap: 'wrap',
             }}
           >
-            <span style={{ color: 'var(--white)' }}>Turn</span>
-            <span style={{ color: 'var(--pink)' }}>Loss</span>
-            <span style={{ color: 'var(--gray)' }}>Into</span>
+            <span style={{ ...wordMask, color: 'var(--white)' }}><span className="calc__word" style={word}>Turn</span></span>
+            <span style={{ ...wordMask, color: 'var(--pink)' }}><span className="calc__word" style={word}>Loss</span></span>
+            <span style={{ ...wordMask, color: 'var(--gray)' }}><span className="calc__word" style={word}>Into</span></span>
           </div>
 
           {/* Row 2: Profit With */}
@@ -56,8 +103,8 @@ export default function CalcSection() {
               color: 'var(--sky)',
             }}
           >
-            <span>Profit</span>
-            <span>With</span>
+            <span style={wordMask}><span className="calc__word" style={word}>Profit</span></span>
+            <span style={wordMask}><span className="calc__word" style={word}>With</span></span>
           </div>
 
           {/* Row 3: Cost-effective Collab */}
@@ -72,7 +119,7 @@ export default function CalcSection() {
               color: 'var(--sky)',
             }}
           >
-            <span>Cost-effective Collab</span>
+            <span style={wordMask}><span className="calc__word" style={word}>Cost-effective Collab</span></span>
           </div>
         </div>
 
@@ -112,6 +159,7 @@ export default function CalcSection() {
               {/* Range Slider */}
               <input
                 type="range"
+                className="calc-range"
                 min="0"
                 max="60"
                 value={rate}
@@ -160,6 +208,7 @@ export default function CalcSection() {
               {/* Range Slider */}
               <input
                 type="range"
+                className="calc-range"
                 min="0"
                 max="320"
                 value={hours}

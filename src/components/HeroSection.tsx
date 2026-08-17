@@ -14,19 +14,36 @@ export default function HeroSection() {
   useGSAP(() => {
     if (!sectionRef.current) return;
 
+    // Subtle idle drift of the model
+    gsap.to('.main-screen__image', { x: -6, duration: 6 });
+
+    // Pin the hero at its end (no spacing) — the About section slides over it.
+    // During the pin, it is the INCOMING About content that animates:
+    // clip-path opens at the top, title/features fade in, cards rise staggered.
     gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'bottom bottom',
-        end: 'bottom top',
-        scrub: true,
+        end: '+=700',
+        scrub: 1,
+        pin: true,
+        pinSpacing: false,
       }
     })
-    .to('.main-screen__title-line-1', { y: '-25%' }, 0)
-    .to('.main-screen__title-line-2', { y: '-15%' }, 0)
-    .to('.main-screen__image img', { y: '12%' }, 0);
+    .fromTo('.about',
+      { clipPath: 'polygon(0 5%, 100% 5%, 100% 100%, 0 100%)' },
+      { clipPath: 'polygon(0 0%, 100% 0%, 100% 100%, 0 100%)', delay: 0.3, duration: 0.7 }, 0)
+    .fromTo('.about .simple-title, .about .features',
+      { opacity: 0 },
+      { opacity: 1, delay: 0.4, duration: 0.6 }, 0)
+    .fromTo('.about__card:nth-child(2n-1)',
+      { opacity: 0, y: 80 },
+      { opacity: 1, y: 0, delay: 0.4, duration: 0.6 }, 0)
+    .fromTo('.about__card:nth-child(2n)',
+      { opacity: 0, y: 80 },
+      { opacity: 1, y: 0, delay: 0.5, duration: 0.55 }, 0);
 
-  }, { scope: sectionRef });
+  });
 
   return (
     <section 
@@ -88,7 +105,7 @@ export default function HeroSection() {
         }}
       >
         <Image 
-          src="/images/hero-woman.webp" 
+          src="/images/woman2.webp" 
           alt="Frontend Woman" 
           width={800} 
           height={1200}
@@ -222,10 +239,17 @@ export default function HeroSection() {
             <span>UKRAINE — ORIGIN</span>
           </div>
 
-          {/* Center: Position */}
-          <div style={{ textAlign: 'center', fontWeight: 600, fontSize: '1.8rem', textTransform: 'none', lineHeight: 1.1 }}>
-            <span style={{ display: 'block', fontWeight: 600 }}>Webflow & Wordpress</span>
-            <span style={{ display: 'block', fontWeight: 400, opacity: 0.85 }}>for Designers</span>
+          {/* Center: Position (marquee) */}
+          <div className="main-screen__marquee marquee" style={{ maxWidth: '34rem', textTransform: 'none' }}>
+            <div className="marquee__track" style={{ fontSize: '1.8rem', lineHeight: 1.1 }}>
+              {[0, 1, 2, 3].map((i) => (
+                <span key={i} className="marquee__item">
+                  <span style={{ fontWeight: 600 }}>Webflow &amp; Wordpress</span>
+                  <span style={{ fontWeight: 400, opacity: 0.85 }}>for Designers</span>
+                  <span style={{ opacity: 0.4 }}>—</span>
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Right: Tech stack */}

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import TitleReveal from './TitleReveal';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const alinaItems = [
+const shahdItems = [
   'Bugless',
   'PixelPerfect',
   'On-time deadlines',
@@ -41,18 +42,49 @@ export default function CompareSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const leftCardRef = useRef<HTMLDivElement>(null);
   const rightCardRef = useRef<HTMLDivElement>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
   const [swapIdx, setSwapIdx] = useState(0);
   const [activeRow, setActiveRow] = useState<number | null>(null);
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setSwapIdx((i) => (i + 1) % swapLabels.length);
-    }, 2200);
-    return () => clearInterval(t);
-  }, []);
+  const [hoverRow, setHoverRow] = useState<number | null>(null);
 
   useGSAP(() => {
     const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+
+    // Scroll-driven row activation: as each row pair crosses the center of
+    // the viewport it becomes the highlighted row (not click/hover-driven).
+    const rows = gsap.utils.toArray<HTMLElement>('.compare__row--left');
+    rows.forEach((row, idx) => {
+      ScrollTrigger.create({
+        trigger: row,
+        start: 'center-=80 center',
+        end: 'center+=170 center',
+        onEnter: () => setActiveRow(idx),
+        onEnterBack: () => setActiveRow(idx),
+      });
+    });
+
+    // Badge counter counts up to 89 while scrolling through the lists,
+    // and the label flips between words as progress advances.
+    const counterState = { value: 0 };
+    gsap.to(counterState, {
+      value: 89,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top 70%',
+        end: 'bottom bottom',
+        scrub: 1,
+        onUpdate: (self) => {
+          setSwapIdx(Math.min(swapLabels.length - 1, Math.floor(self.progress * swapLabels.length)));
+        },
+      },
+      onUpdate: () => {
+        if (counterRef.current) {
+          counterRef.current.textContent = String(Math.round(counterState.value));
+        }
+      },
+    });
+
     if (!isDesktop) return;
 
     // 3D tilt effect on mousemove across each card
@@ -62,15 +94,15 @@ export default function CompareSection() {
         const rect = element.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        const rotY = (x / rect.width - 0.5) * 10;
-        const rotX = (y / rect.height - 0.5) * -10;
+        const rotY = (x / rect.width - 0.5) * 8;
+        const rotX = (y / rect.height - 0.5) * -8;
 
         gsap.to(element, {
           rotationX: rotX,
           rotationY: rotY,
           ease: 'power2.out',
           duration: 0.4,
-          transformPerspective: 1000,
+          transformPerspective: 1400,
         });
       };
 
@@ -87,6 +119,23 @@ export default function CompareSection() {
 
   }, { scope: sectionRef });
 
+  const highlight = hoverRow ?? activeRow;
+
+  const rowStyle = (idx: number): React.CSSProperties => ({
+    fontSize: highlight === idx ? 'clamp(2.2rem, 2.6vw, 3.4rem)' : 'clamp(1.8rem, 2vw, 2.4rem)',
+    fontWeight: highlight === idx ? 800 : 500,
+    letterSpacing: '-0.02em',
+    lineHeight: 1.15,
+    borderBottom: '1px solid rgba(0,0,0,0.1)',
+    paddingBottom: '1.2rem',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    cursor: 'pointer',
+    opacity: highlight === null || highlight === idx ? 1 : 0.45,
+    transition: 'all 0.25s ease',
+  });
+
   return (
     <section
       ref={sectionRef}
@@ -102,8 +151,8 @@ export default function CompareSection() {
       <div className="center-wrap" style={{ width: '100%' }}>
         
         {/* Section Title */}
-        <h2 
-          className="simple-title" 
+        <TitleReveal
+          text="Approach"
           style={{ 
             fontSize: 'clamp(5rem, 16vw, 24rem)',
             lineHeight: 0.82,
@@ -113,11 +162,9 @@ export default function CompareSection() {
             color: 'var(--white)',
             marginBottom: '4rem',
           }}
-        >
-          <span>Approach</span>
-        </h2>
+        />
 
-        {/* Compare Content (Side-by-Side 2 Cards with Center Floating Badge) */}
+        {/* Compare Content (Side-by-Side 2 Cards with Center Sticky Badge) */}
         <div
           style={{
             display: 'grid',
@@ -127,7 +174,7 @@ export default function CompareSection() {
           }}
           className="compare-grid"
         >
-          {/* Left Column: ALINA (Sky Blue) */}
+          {/* Left Column: SHAHD (Sky Blue) */}
           <div
             ref={leftCardRef}
             style={{
@@ -141,7 +188,7 @@ export default function CompareSection() {
               transition: 'box-shadow 0.3s ease',
             }}
           >
-            {/* Header: ALINA */}
+            {/* Header: SHAHD */}
             <div
               style={{
                 fontSize: 'clamp(2.4rem, 3.5vw, 4.2rem)',
@@ -154,33 +201,22 @@ export default function CompareSection() {
                 alignItems: 'center',
               }}
             >
-              <span>ALINA</span>
+              <span>SHAHD</span>
               <span style={{ fontSize: '1.4rem', fontWeight: 700, opacity: 0.5, letterSpacing: '0.04em' }}>POSITIVE</span>
             </div>
 
             {/* List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6rem' }}>
-              {alinaItems.map((item, idx) => (
+              {shahdItems.map((item, idx) => (
                 <div
                   key={item}
-                  onMouseEnter={() => setActiveRow(idx)}
-                  onMouseLeave={() => setActiveRow(null)}
-                  style={{
-                    fontSize: activeRow === idx ? 'clamp(2.2rem, 2.6vw, 3.4rem)' : 'clamp(1.8rem, 2vw, 2.4rem)',
-                    fontWeight: activeRow === idx ? 800 : 500,
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.15,
-                    borderBottom: '1px solid rgba(0,0,0,0.1)',
-                    paddingBottom: '1.2rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
+                  className="compare__row--left"
+                  onMouseEnter={() => setHoverRow(idx)}
+                  onMouseLeave={() => setHoverRow(null)}
+                  style={rowStyle(idx)}
                 >
                   <span>{item}</span>
-                  <span style={{ fontSize: '1.4rem', opacity: activeRow === idx ? 1 : 0.3 }}>✓</span>
+                  <span style={{ fontSize: '1.4rem', opacity: highlight === idx ? 1 : 0.3 }}>✓</span>
                 </div>
               ))}
             </div>
@@ -222,74 +258,72 @@ export default function CompareSection() {
               {freelancerItems.map((item, idx) => (
                 <div
                   key={item}
-                  onMouseEnter={() => setActiveRow(idx)}
-                  onMouseLeave={() => setActiveRow(null)}
-                  style={{
-                    fontSize: activeRow === idx ? 'clamp(2.2rem, 2.6vw, 3.4rem)' : 'clamp(1.8rem, 2vw, 2.4rem)',
-                    fontWeight: activeRow === idx ? 800 : 500,
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.15,
-                    borderBottom: '1px solid rgba(0,0,0,0.1)',
-                    paddingBottom: '1.2rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
+                  onMouseEnter={() => setHoverRow(idx)}
+                  onMouseLeave={() => setHoverRow(null)}
+                  style={rowStyle(idx)}
                 >
                   <span>{item}</span>
-                  <span style={{ fontSize: '1.4rem', opacity: activeRow === idx ? 1 : 0.3 }}>✕</span>
+                  <span style={{ fontSize: '1.4rem', opacity: highlight === idx ? 1 : 0.3 }}>✕</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Floating Center Black Circle Badge */}
+          {/* Center Sticky Counter Badge — stays pinned while lists scroll */}
           <div
+            className="compare__badge-col"
             style={{
               position: 'absolute',
               left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '18rem',
-              height: '18rem',
-              borderRadius: '50%',
-              backgroundColor: '#121214',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
+              top: 0,
+              height: '100%',
+              transform: 'translateX(-50%)',
               zIndex: 10,
-              boxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.45)',
-              border: '2px solid rgba(255, 255, 255, 0.08)',
               pointerEvents: 'none',
             }}
           >
-            <span 
-              style={{ 
-                fontSize: '1.4rem', 
-                fontWeight: 700, 
-                letterSpacing: '0.06em', 
-                color: 'var(--gray)',
-                textTransform: 'uppercase',
-                marginBottom: '0.2rem',
-                transition: 'opacity 0.2s ease',
+            <div
+              style={{
+                position: 'sticky',
+                top: 'calc(50vh - 9rem)',
+                width: '18rem',
+                height: '18rem',
+                borderRadius: '50%',
+                backgroundColor: '#121214',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.45)',
+                border: '2px solid rgba(255, 255, 255, 0.08)',
               }}
             >
-              {swapLabels[swapIdx]}
-            </span>
-            <span 
-              style={{ 
-                fontSize: '6.2rem', 
-                fontWeight: 800, 
-                lineHeight: 1, 
-                color: 'var(--sky)',
-                letterSpacing: '-0.03em',
-              }}
-            >
-              89
-            </span>
+              <span 
+                style={{ 
+                  fontSize: '1.4rem', 
+                  fontWeight: 700, 
+                  letterSpacing: '0.06em', 
+                  color: 'var(--gray)',
+                  textTransform: 'uppercase',
+                  marginBottom: '0.2rem',
+                  transition: 'opacity 0.2s ease',
+                }}
+              >
+                {swapLabels[swapIdx]}
+              </span>
+              <span 
+                ref={counterRef}
+                style={{ 
+                  fontSize: '6.2rem', 
+                  fontWeight: 800, 
+                  lineHeight: 1, 
+                  color: 'var(--sky)',
+                  letterSpacing: '-0.03em',
+                }}
+              >
+                0
+              </span>
+            </div>
           </div>
 
         </div>
@@ -301,7 +335,7 @@ export default function CompareSection() {
           .compare-grid {
             grid-template-columns: 1fr !important;
           }
-          .compare-grid > div:last-child {
+          .compare__badge-col {
             display: none !important;
           }
         }
