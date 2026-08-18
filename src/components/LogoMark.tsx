@@ -2,12 +2,11 @@
  * SHAHD KHAIRY identity — engineered logotype.
  *
  * Both words set in the site's own display face (Inter Tight 800) and shipped
- * as raw vector paths, tracked tight so the letters interlock. The signature
- * device is the KEYSTONE: the enclosed counter of the A filled solid in the
- * hero violet, so the accent lives inside the letterform instead of cutting
- * across it.
+ * as raw vector paths, tracked tight so the letters interlock. Two justified
+ * lines, SHAHD over KHAIRY, width-matched into one solid block.
  *
- * Palette is drawn straight from the hero gradient.
+ * Monochrome by design: no accent colour, no devices, no marks. The
+ * letterforms carry the brand on their own.
  */
 
 import {
@@ -18,14 +17,9 @@ import {
   LOGO_HEIGHT,
 } from './logo-paths';
 
-/** The A — the axis of the word — carries the accent */
-const KEYSTONE_INDEX = 2;
+export const INK = '#F4F1EA'; // warm ivory
 
-export const INK = '#F4F1EA';    // warm ivory
-export const SIGNAL = '#BE8FFF'; // hero violet — hsl(265 100% 78%)
-export const SIGNAL_2 = '#3D9EFF'; // hero blue — hsl(210 100% 62%)
-
-/** SHAHD — with the violet keystone set into the A */
+/** SHAHD */
 export function Wordmark({
   color = INK,
   drawable = false,
@@ -43,28 +37,20 @@ export function Wordmark({
       aria-label="SHAHD"
       role="img"
     >
-
-      {SHAHD_LETTERS.map((l, i) => {
-        const isKeystone = i === KEYSTONE_INDEX;
-        return (
-          <path
-            key={i}
-            className={
-              drawable
-                ? `wm-letter wm-letter--${i}${isKeystone ? ' wm-key' : ''}`
-                : undefined
-            }
-            d={l.d}
-            transform={`translate(0, ${LOGO_HEIGHT})`}
-            fill={isKeystone ? SIGNAL : color}
-          />
-        );
-      })}
+      {SHAHD_LETTERS.map((l, i) => (
+        <path
+          key={i}
+          className={drawable ? `wm-letter wm-letter--${i}` : undefined}
+          d={l.d}
+          transform={`translate(0, ${LOGO_HEIGHT})`}
+          fill={color}
+        />
+      ))}
     </svg>
   );
 }
 
-/** KHAIRY — same letterforms, no keystone */
+/** KHAIRY */
 export function WordmarkSecond({ color = INK }: { color?: string }) {
   return (
     <svg
@@ -83,10 +69,7 @@ export function WordmarkSecond({ color = INK }: { color?: string }) {
   );
 }
 
-/**
- * Header / menu lockup — two justified vector lines, SHAHD over KHAIRY.
- * Both lines are width-matched, so the block reads as one solid mark.
- */
+/** Header / menu lockup — two justified vector lines, SHAHD over KHAIRY */
 export default function LogoMark() {
   return (
     <span

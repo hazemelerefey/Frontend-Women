@@ -3,23 +3,25 @@
 import { useState, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Wordmark, INK, SIGNAL, SIGNAL_2 } from './LogoMark';
+import { Wordmark, INK } from './LogoMark';
+import { SHAHD_LETTERS, SHAHD_WIDTH, LOGO_HEIGHT } from './logo-paths';
 
 gsap.registerPlugin(useGSAP);
 
 const MONO = "'IBM Plex Mono', monospace";
 const COLUMNS = [0, 1, 2, 3, 4];
 const GRID = Array.from({ length: 12 }, (_, i) => i);
+const CANVAS = '#0C0C0C';
 
 /**
- * Marquee bands — mixed filled / outlined type, drawn from the hero palette.
+ * Marquee bands — mixed filled / outlined type, monochrome ivory.
  * Alternating scroll direction builds the kinetic poster.
  */
 const BANDS = [
   { text: 'REACT · NODE · MONGO', style: 'outline' as const, dir: -1 },
   { text: 'FULLSTACK', style: 'fill' as const, dir: 1 },
-  { text: 'DESIGN · CODE · SHIP', style: 'violet' as const, dir: -1 },
-  { text: 'GSAP · THREE · R3F', style: 'blue' as const, dir: 1 },
+  { text: 'DESIGN · CODE · SHIP', style: 'soft' as const, dir: -1 },
+  { text: 'GSAP · THREE · R3F', style: 'hairline' as const, dir: 1 },
   { text: 'CAIRO — 2026', style: 'faint' as const, dir: -1 },
 ];
 
@@ -45,87 +47,120 @@ export default function Preloader() {
     /* ═══════ PHASE 1 — REGISTRATION (the press aligns its plates) ═══════ */
     tl.fromTo('.pl-grid-line',
       { scaleY: 0, transformOrigin: '50% 0%' },
-      { scaleY: 1, duration: 0.5, stagger: 0.025, ease: 'expo.inOut' }, 0)
+      { scaleY: 1, duration: 0.55, stagger: 0.025, ease: 'power2.inOut' }, 0)
       .fromTo('.pl-cross',
-        { scale: 0, rotate: -90, opacity: 0 },
-        { scale: 1, rotate: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(2)' }, 0.15)
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power3.out' }, 0.15)
       .fromTo('.pl-label',
         { opacity: 0, y: 8 },
-        { opacity: 1, y: 0, duration: 0.35, stagger: 0.06, ease: 'expo.out' }, 0.3);
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, ease: 'power2.out' }, 0.3);
 
-    /* ═══════ PHASE 2 — KINETIC CASCADE (bands fly in, alternating) ═══════ */
+    /* ═══════ PHASE 2 — KINETIC CASCADE (bands drift in, alternating) ═══════ */
     BANDS.forEach((b, i) => {
       tl.fromTo(`.pl-band--${i} .pl-band__inner`,
-        { xPercent: b.dir * 55, filter: 'blur(14px)' },
-        { xPercent: b.dir * -6, filter: 'blur(0px)', duration: 1.15, ease: 'expo.out' }, 0.72 + i * 0.11)
+        { xPercent: b.dir * 55, filter: 'blur(16px)' },
+        { xPercent: b.dir * -6, filter: 'blur(0px)', duration: 1.3, ease: 'power3.out' }, 0.72 + i * 0.11)
         .fromTo(`.pl-band--${i}`,
-          { opacity: 0, scaleY: 0.3, transformOrigin: '50% 50%' },
-          { opacity: 1, scaleY: 1, duration: 0.55, ease: 'expo.out' }, 0.72 + i * 0.11);
+          { opacity: 0, scaleY: 0.4, transformOrigin: '50% 50%' },
+          { opacity: 1, scaleY: 1, duration: 0.7, ease: 'power2.out' }, 0.72 + i * 0.11);
     });
-    tl.to('.pl-band__inner', { xPercent: (i) => BANDS[i].dir * -11, duration: 0.9, ease: 'none' }, 1.9);
+    tl.to('.pl-band__inner', { xPercent: (i) => BANDS[i].dir * -12, duration: 1.1, ease: 'none' }, 1.9);
 
-    /* ═══════ PHASE 3 — COLLAPSE (bands crush into a single violet line) ═══════ */
+    /* ═══════ PHASE 3 — FLUID GATHER ═══════
+       No hard line, no snap. The bands soften, swell and drift together into
+       the middle, dissolving into light as the name grows out of them.        */
     tl.to('.pl-band', {
-      yPercent: (i) => (2 - i) * 115,
-      scaleY: 0,
+      y: (i) => (2 - i) * -6 + 'vh',
+      scaleY: 1.35,
+      scaleX: 1.06,
+      filter: 'blur(26px)',
       opacity: 0,
-      duration: 0.5,
-      ease: 'expo.inOut',
-      stagger: { each: 0.03, from: 'edges' },
-    }, 2.62)
-      .to('.pl-grid-line', { opacity: 0, duration: 0.35 }, 2.62)
-      .fromTo('.pl-line',
-        { scaleX: 0, opacity: 1 },
-        { scaleX: 1, duration: 0.45, ease: 'expo.out' }, 2.72)
-      // soft violet bloom on impact
-      .to('.pl-flash', { opacity: 0.3, duration: 0.05, ease: 'none' }, 3.04)
-      .to('.pl-flash', { opacity: 0, duration: 0.22, ease: 'none' }, 3.09);
+      duration: 1.1,
+      ease: 'power2.inOut',
+      stagger: { each: 0.055, from: 'edges' },
+    }, 2.6)
+      .to('.pl-grid-line', { opacity: 0, duration: 0.8, ease: 'power2.inOut' }, 2.7)
+      // a slow bloom breathes through the middle of the gather
+      .to('.pl-bloom', { opacity: 0.5, duration: 0.75, ease: 'sine.inOut' }, 2.75)
+      .to('.pl-bloom', { opacity: 0, duration: 0.9, ease: 'sine.inOut' }, 3.5);
 
-    /* ═══════ PHASE 4 — IGNITION (logotype unmasks out of the line) ═══════ */
+    /* ═══════ PHASE 4 — THE NAME SWELLS UP ═══════ */
     tl.fromTo('.pl-mark-wrap',
-      { clipPath: 'inset(50% 0% 50% 0%)' },
-      { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.75, ease: 'expo.inOut' }, 3.1)
-      .fromTo('.pl-mark-wrap',
-        { scale: 1.12 },
-        { scale: 1, duration: 0.9, ease: 'expo.out' }, 3.1)
-      .to('.pl-line', { scaleX: 0, opacity: 0, duration: 0.5, ease: 'expo.inOut' }, 3.3)
-      // the keystone ignites — the A turns from ivory to hero violet
-      .fromTo('.wm-key',
-        { fill: INK },
-        { fill: SIGNAL, duration: 0.3, ease: 'power2.out' }, 3.75)
-      .set('.wm-key', { fill: INK }, 4.12)
-      .set('.wm-key', { fill: SIGNAL }, 4.17);
+      { scale: 0.82, opacity: 0, filter: 'blur(26px)' },
+      { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1.5, ease: 'power3.out' }, 3.1)
+      // it keeps breathing — never sits still
+      .to('.pl-mark-wrap', { scale: 1.045, duration: 1.5, ease: 'sine.inOut' }, 4.4);
 
-    /* ═══════ COUNTER — ghost outline + corner readout ═══════ */
-    tl.fromTo('.pl-ghost', { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.8)
-      .to(progress, { v: 100, duration: 3.5, ease: 'power2.inOut', onUpdate: setCount }, 0.8)
-      .to('.pl-ghost', { opacity: 0, duration: 0.5 }, 4.5);
+    /* ═══════ COUNTER ═══════ */
+    tl.fromTo('.pl-ghost', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 0.8)
+      .to(progress, { v: 100, duration: 3.6, ease: 'power2.inOut', onUpdate: setCount }, 0.8)
+      .to('.pl-ghost', { opacity: 0, duration: 0.7, ease: 'power2.inOut' }, 4.3);
 
-    /* ═══════ PHASE 5 — PORTAL EXIT (mark pushes past the frame) ═══════ */
-    tl.to('.pl-mark-wrap', { scale: 1.45, duration: 0.85, ease: 'expo.in' }, 5.1)
-      .to('.pl-label', { opacity: 0, y: -18, duration: 0.3, ease: 'expo.in' }, 5.1)
-      .to('.pl-mark-wrap', { opacity: 0, duration: 0.35, ease: 'none' }, 5.57)
-      .to('.pl-mark, .pl-frame', { opacity: 0, duration: 0.3 }, 5.57)
-      .to('.pl-col', {
-        yPercent: -100,
-        duration: 0.7,
-        ease: 'expo.inOut',
-        stagger: { each: 0.06, from: 'center' },
-      }, 5.65);
+    /* ═══════ PHASE 5 — THE PORTAL ═══════
+       The letters stop being ivory and become windows: the same SHAHD is cut
+       out of the cover, so the hero shows through the letterforms. Then the
+       cut-out swells until the hero has opened all the way out.              */
+
+    // Cut the letters out of a full-viewport panel, lined up pixel-for-pixel
+    // with the ivory mark it replaces. even-odd turns the letterforms into
+    // holes, so the hero shows through them like windows.
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const markSvg = rootRef.current.querySelector<SVGSVGElement>('.pl-mark-wrap svg');
+    const place = rootRef.current.querySelector<SVGGElement>('.pl-portal-place');
+    const cut = rootRef.current.querySelector<SVGPathElement>('.pl-portal-cut');
+
+    if (markSvg && place && cut) {
+      const r = markSvg.getBoundingClientRect();
+      const s = r.width / SHAHD_WIDTH;
+      // the wordmark viewBox starts at y=-4, so the glyph box starts 4 units in
+      const tx = r.left;
+      const ty = r.top + 4 * s;
+
+      place.setAttribute('transform', `translate(${tx}, ${ty + LOGO_HEIGHT * s}) scale(${s})`);
+
+      // viewport rectangle expressed in glyph units, generously oversized
+      const x0 = (0 - tx) / s - vw / s;
+      const x1 = (vw - tx) / s + vw / s;
+      const y0 = (0 - ty - LOGO_HEIGHT * s) / s - vh / s;
+      const y1 = (vh - ty - LOGO_HEIGHT * s) / s + vh / s;
+
+      const panel = `M${x0},${y0} L${x1},${y0} L${x1},${y1} L${x0},${y1} Z`;
+      cut.setAttribute('d', `${panel} ${SHAHD_LETTERS.map((l) => l.d).join(' ')}`);
+    }
+
+    // Hand off without a single hard edge. The cut-out panel is already in
+    // place (identical to the canvas, so nothing visibly changes), then the
+    // ivory dissolves away *inside its own silhouette* — the letterforms fill
+    // with the hero instead of the loader — and the window swells open.
+    tl.to('.pl-label, .pl-cross', { opacity: 0, duration: 0.7, ease: 'power2.inOut' }, 4.8)
+      .set('.pl-portal', { opacity: 1 }, 5.2)
+      .set('.pl-col', { opacity: 0 }, 5.2)
+      .set('.pl-glow', { opacity: 0 }, 5.2)
+      // the hero starts dimmed inside the letters, then develops up
+      .set('.pl-scrim', { opacity: 0.66 }, 5.2)
+      .to('.pl-mark-wrap', { opacity: 0, duration: 0.55, ease: 'sine.inOut' }, 5.35)
+      .to('.pl-scrim', { opacity: 0, duration: 1.35, ease: 'power1.out' }, 5.7)
+      // the window swells open into the hero
+      .to('.pl-portal-zoom', {
+        scale: 34,
+        svgOrigin: `${vw / 2} ${vh / 2}`,
+        duration: 1.9,
+        ease: 'power2.in',
+      }, 5.7);
 
   }, { scope: rootRef });
 
   if (!visible) return null;
 
-  const bandStyle = (s: 'fill' | 'outline' | 'violet' | 'blue' | 'faint') => {
+  const bandStyle = (s: 'fill' | 'outline' | 'soft' | 'hairline' | 'faint') => {
     if (s === 'fill') return { color: INK };
-    if (s === 'violet') return { color: SIGNAL };
-    if (s === 'blue') return { color: SIGNAL_2 };
-    if (s === 'faint') return { color: 'rgba(244, 241, 234, 0.14)' };
-    return {
-      color: 'transparent',
-      WebkitTextStroke: '1.5px rgba(190, 143, 255, 0.5)',
-    };
+    if (s === 'soft') return { color: 'rgba(244, 241, 234, 0.72)' };
+    if (s === 'faint') return { color: 'rgba(244, 241, 234, 0.13)' };
+    if (s === 'hairline') {
+      return { color: 'transparent', WebkitTextStroke: '1.5px rgba(244, 241, 234, 0.28)' };
+    }
+    return { color: 'transparent', WebkitTextStroke: '1.5px rgba(244, 241, 234, 0.45)' };
   };
 
   return (
@@ -134,7 +169,7 @@ export default function Preloader() {
       className="preloader"
       style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden' }}
     >
-      {/* Canvas columns — wipe away at the very end */}
+      {/* Canvas columns */}
       {COLUMNS.map((i) => (
         <div
           key={i}
@@ -145,26 +180,27 @@ export default function Preloader() {
             bottom: '-1px',
             left: `${i * 20}%`,
             width: '20.5%',
-            backgroundColor: '#0C0C0C',
+            backgroundColor: CANVAS,
           }}
         />
       ))}
 
-      {/* Hero-derived ambient glow, so the loader shares the hero's air */}
+      {/* Hero-derived ambient light, so the loader shares the hero's air */}
       <div
+        className="pl-glow"
         style={{
           position: 'absolute',
           inset: 0,
           zIndex: 1,
           pointerEvents: 'none',
           background: `
-            radial-gradient(ellipse 60% 55% at 50% -15%, hsla(265, 100%, 78%, 0.28) 0%, hsla(265, 100%, 78%, 0.12) 45%, rgba(12,12,12,0) 100%),
-            radial-gradient(ellipse 60% 55% at 50% 115%, hsla(210, 100%, 62%, 0.22) 0%, hsla(210, 100%, 62%, 0.09) 45%, rgba(12,12,12,0) 100%)
+            radial-gradient(ellipse 60% 55% at 50% -15%, hsla(265, 100%, 78%, 0.22) 0%, hsla(265, 100%, 78%, 0.09) 45%, rgba(12,12,12,0) 100%),
+            radial-gradient(ellipse 60% 55% at 50% 115%, hsla(210, 100%, 62%, 0.18) 0%, hsla(210, 100%, 62%, 0.07) 45%, rgba(12,12,12,0) 100%)
           `,
         }}
       />
 
-      {/* ── Registration frame: grid + corner marks ── */}
+      {/* ── Registration frame ── */}
       <div className="pl-frame" style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none' }}>
         {GRID.map((i) => (
           <div
@@ -188,18 +224,18 @@ export default function Preloader() {
           { bottom: '2.4rem', right: '2.4rem' },
         ].map((pos, i) => (
           <div key={i} className="pl-cross" style={{ position: 'absolute', width: '1.4rem', height: '1.4rem', ...pos }}>
-            <span style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: '1px', backgroundColor: SIGNAL }} />
-            <span style={{ position: 'absolute', left: '50%', top: 0, height: '100%', width: '1px', backgroundColor: SIGNAL }} />
+            <span style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: '1px', backgroundColor: 'rgba(244,241,234,0.55)' }} />
+            <span style={{ position: 'absolute', left: '50%', top: 0, height: '100%', width: '1px', backgroundColor: 'rgba(244,241,234,0.55)' }} />
           </div>
         ))}
       </div>
 
       {/* ── Corner labels ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', fontFamily: MONO, fontSize: '1.05rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(244, 241, 234, 0.45)' }}>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', fontFamily: MONO, fontSize: '1.05rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(244, 241, 234, 0.42)' }}>
         <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', left: '5.2rem' }}>Shahd Khairy</div>
         <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', right: '5.2rem' }}>Portfolio / 2026</div>
         <div className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', left: '5.2rem' }}>Cairo — EG</div>
-        <div ref={pctRef} className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', right: '5.2rem', color: SIGNAL, fontVariantNumeric: 'tabular-nums' }}>000%</div>
+        <div ref={pctRef} className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', right: '5.2rem', color: 'rgba(244,241,234,0.7)', fontVariantNumeric: 'tabular-nums' }}>000%</div>
       </div>
 
       {/* ── Ghost counter ── */}
@@ -216,7 +252,7 @@ export default function Preloader() {
           fontWeight: 800,
           letterSpacing: '-0.04em',
           color: 'transparent',
-          WebkitTextStroke: '1px rgba(190, 143, 255, 0.12)',
+          WebkitTextStroke: '1px rgba(244, 241, 234, 0.08)',
           lineHeight: 1,
           zIndex: 1,
           pointerEvents: 'none',
@@ -267,25 +303,21 @@ export default function Preloader() {
         ))}
       </div>
 
-      {/* ── Impact line — hero two-tone ── */}
+      {/* ── Soft bloom that breathes through the gather ── */}
       <div
-        className="pl-line"
+        className="pl-bloom"
         style={{
           position: 'absolute',
-          top: '50%',
-          left: '8%',
-          width: '84%',
-          height: '2px',
-          background: `linear-gradient(90deg, ${SIGNAL_2} 0%, ${SIGNAL} 50%, ${SIGNAL_2} 100%)`,
-          transform: 'scaleX(0)',
-          transformOrigin: 'center',
-          opacity: 0,
+          inset: 0,
           zIndex: 5,
           pointerEvents: 'none',
+          opacity: 0,
+          background:
+            'radial-gradient(ellipse 78% 42% at 50% 50%, rgba(244,241,234,0.16) 0%, rgba(244,241,234,0.05) 45%, rgba(12,12,12,0) 100%)',
         }}
       />
 
-      {/* ── Logotype end-card — the mark alone ── */}
+      {/* ── The name — big ── */}
       <div
         className="pl-mark"
         style={{
@@ -298,26 +330,46 @@ export default function Preloader() {
           pointerEvents: 'none',
         }}
       >
-        <div
-          className="pl-mark-wrap"
-          style={{ width: 'min(56rem, 74vw)', clipPath: 'inset(50% 0% 50% 0%)' }}
-        >
+        <div className="pl-mark-wrap" style={{ width: 'min(78rem, 86vw)', opacity: 0 }}>
           <Wordmark drawable />
         </div>
       </div>
 
-      {/* ── Impact bloom ── */}
+      {/* ── Scrim: below the cut-out, so it only tints what the holes reveal ── */}
       <div
-        className="pl-flash"
+        className="pl-scrim"
         style={{
           position: 'absolute',
           inset: 0,
-          background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${SIGNAL} 0%, hsla(265,100%,78%,0.35) 45%, rgba(12,12,12,0) 100%)`,
+          backgroundColor: CANVAS,
           opacity: 0,
           zIndex: 7,
           pointerEvents: 'none',
         }}
       />
+
+      {/* ── The portal: the cover with SHAHD cut clean out of it ── */}
+      <svg
+        className="pl-portal"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 8,
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
+        aria-hidden
+      >
+        <g className="pl-portal-zoom">
+          <g className="pl-portal-place">
+            {/* d is built at runtime: viewport rect minus the letterforms */}
+            <path className="pl-portal-cut" fillRule="evenodd" fill={CANVAS} />
+          </g>
+        </g>
+      </svg>
+
     </div>
   );
 }
