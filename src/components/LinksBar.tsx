@@ -8,9 +8,9 @@ import { useGSAP } from '@gsap/react';
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const links = [
-  { label: 'WhatsApp', href: 'https://wa.me/0000000000' },
-  { label: 'LinkedIn Account', href: 'https://www.linkedin.com/' },
-  { label: 'shahd@frontend-w.com', href: 'mailto:shahd@frontend-w.com' },
+  { label: 'WhatsApp', href: 'https://wa.me/201142657362' },
+  { label: 'LinkedIn Account', href: 'https://www.linkedin.com/in/shahd-khairy/' },
+  { label: 'shahdkhairy2026@gmail.com', href: 'mailto:shahdkhairy2026@gmail.com' },
 ];
 
 export default function LinksBar() {

@@ -119,8 +119,8 @@ export default function Preloader() {
 
   if (!visible) return null;
 
-  const label1 = 'SHAHD — FRONTEND WOMAN';
-  const label2 = 'PORTFOLIO ©2025';
+  const label1 = 'SHAHD KHAIRY — FULL STACK';
+  const label2 = 'PORTFOLIO ©2026';
 
   return (
     <div

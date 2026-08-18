@@ -157,7 +157,7 @@ export default function HeroSection() {
               width: '100%',
             }}
           >
-            {'FRONTEND'.split('').map((c, i) => (
+            {'FULLSTACK'.split('').map((c, i) => (
               <span key={i} style={{ display: 'inline-block' }}>{c}</span>
             ))}
           </h1>
@@ -259,7 +259,7 @@ export default function HeroSection() {
         >
           {/* Left: Origin */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span>UKRAINE — ORIGIN</span>
+            <span>CAIRO, EGYPT — ORIGIN</span>
           </div>
 
           {/* Center: Position (marquee) */}
@@ -267,8 +267,8 @@ export default function HeroSection() {
             <div className="marquee__track" style={{ fontSize: '1.8rem', lineHeight: 1.1 }}>
               {[0, 1, 2, 3].map((i) => (
                 <span key={i} className="marquee__item">
-                  <span style={{ fontWeight: 600 }}>Webflow &amp; Wordpress</span>
-                  <span style={{ fontWeight: 400, opacity: 0.85 }}>for Designers</span>
+                  <span style={{ fontWeight: 600 }}>React &amp; Node.js</span>
+                  <span style={{ fontWeight: 400, opacity: 0.85 }}>for modern products</span>
                   <span style={{ opacity: 0.4 }}>—</span>
                 </span>
               ))}
@@ -277,8 +277,8 @@ export default function HeroSection() {
 
           {/* Right: Tech stack */}
           <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-            <span>WEBFLOW & WORDPRESS</span>
-            <span style={{ opacity: 0.6 }}>GSAP ANIMATIONS</span>
+            <span>MERN STACK</span>
+            <span style={{ opacity: 0.6 }}>THREE.JS & GSAP</span>
           </div>
         </div>
       </div>

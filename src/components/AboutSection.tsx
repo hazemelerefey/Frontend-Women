@@ -140,8 +140,8 @@ export default function AboutSection() {
         {/* Subheader Feature Row */}
         <div style={{ marginBottom: '15rem' }}>
           <FeaturesBar 
-            title="PIXEL-PERFECT" 
-            items={['SUPPORT ∞', '/CODE-QUALITY', '//HASSLE-FREE']} 
+            title="MERN STACK" 
+            items={['REST APIS', '/JWT-AUTH', '//CLEAN CODE']} 
           />
         </div>
 
@@ -157,41 +157,41 @@ export default function AboutSection() {
               gap: '1.6rem',
             }}
           >
-            {/* Card 1: Top-Left */}
+            {/* Card 1: Top-Left — MERN training */}
             <a
-              href="https://artydevs.com"
+              href="https://www.linkedin.com/in/shahd-khairy/"
               target="_blank"
               rel="noreferrer"
               className="about__card"
               style={{ ...cardBase, background: 'linear-gradient(180deg, #94bdf7 0%, #b4bdf7 100%)' }}
             >
               <div style={{ fontSize: '10rem', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 0.9 }}>
-                LEAD
+                MERN
               </div>
               <div>
                 <div style={{ fontSize: 'clamp(2.2rem, 3.2vw, 4.2rem)', fontWeight: 400, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '2.5rem' }}>
-                  Projects at ArtyDevs
+                  Full Stack at Digilians · MCIT
                 </div>
                 <div className="btn btn--black" style={{ display: 'inline-flex' }}>
-                  <div className="btn__text link-hover">artydevs.com</div>
+                  <div className="btn__text link-hover">AI-BASED DIPLOMA</div>
                 </div>
               </div>
             </a>
 
-            {/* Card 2: Top-Right */}
+            {/* Card 2: Top-Right — certificates */}
             <div
               className="about__card"
               style={{ ...cardBase, background: 'linear-gradient(180deg, #94bdf7 0%, #b4bdf7 100%)' }}
             >
               <div style={{ fontSize: '10rem', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 0.9 }}>
-                AWARDS 12+
+                CERTS 3+
               </div>
               <div>
                 <div style={{ fontSize: 'clamp(2.2rem, 3.2vw, 4.2rem)', fontWeight: 400, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '2.5rem' }}>
-                  Won with Partners
+                  Certified & Cloud-Ready
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                  {['FWA', 'CSS DESIGN', 'AWWWARDS'].map((badge) => (
+                  {['META FRONT-END', 'AWS CLOUD', 'DEVOPS CI/CD'].map((badge) => (
                     <div key={badge} className="btn btn--black btn--none" style={{ display: 'inline-flex' }}>
                       <div className="btn__text link-hover">{badge}</div>
                     </div>
@@ -200,27 +200,27 @@ export default function AboutSection() {
               </div>
             </div>
 
-            {/* Card 3: Bottom-Left */}
+            {/* Card 3: Bottom-Left — shipped projects */}
             <div
               className="about__card"
               style={{ ...cardBase, background: 'linear-gradient(180deg, #b4bdf7 0%, #d4bdf8 100%)' }}
             >
               <div style={{ fontSize: '10rem', fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 0.9 }}>
-                98%
+                6+
               </div>
               <div>
                 <div style={{ fontSize: 'clamp(2.2rem, 3.2vw, 4.2rem)', fontWeight: 400, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '2.5rem' }}>
-                  Upwork Job Success
+                  Full-Stack Projects Built
                 </div>
                 <div className="btn btn--black btn--none" style={{ display: 'inline-flex' }}>
-                  <div className="btn__text link-hover">TOP RATED</div>
+                  <div className="btn__text link-hover">REACT · NODE · MONGODB</div>
                 </div>
               </div>
             </div>
 
-            {/* Card 4: Bottom-Right */}
+            {/* Card 4: Bottom-Right — human card */}
             <a
-              href="https://clutch.co/profile/artydevs"
+              href="https://github.com/hazemelerefey/neuroscope"
               target="_blank"
               rel="noreferrer"
               className="about__card"
@@ -231,10 +231,10 @@ export default function AboutSection() {
               </div>
               <div>
                 <div style={{ fontSize: 'clamp(2.2rem, 3.2vw, 4.2rem)', fontWeight: 400, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '2.5rem' }}>
-                  I ♡ Code, Humor & Designers
+                  I ♡ Clean APIs, 3D & Teamwork
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                  {['10+ REVIEWS', 'SATISFIED CUSTOMERS'].map((badge) => (
+                  {['AYAIR 2026', 'NEUROSCOPE'].map((badge) => (
                     <div key={badge} className="btn btn--black" style={{ display: 'inline-flex' }}>
                       <div className="btn__text link-hover">{badge}</div>
                     </div>
@@ -252,7 +252,7 @@ export default function AboutSection() {
             <div className="mission__inner">
               <div style={{ marginBottom: '5rem' }}>
                 <FeaturesBar 
-                  title="2025" 
+                  title="2026" 
                   items={['MY', 'MISSION', 'IS']} 
                   reverse={true}
                 />
