@@ -8,85 +8,139 @@ import { Wordmark, INK, SIGNAL } from './LogoMark';
 gsap.registerPlugin(useGSAP);
 
 const MONO = "'IBM Plex Mono', monospace";
-const WORDS = ['DESIGN', 'CODE', 'SHIP'];
 const COLUMNS = [0, 1, 2, 3, 4];
+const GRID = Array.from({ length: 12 }, (_, i) => i);
+
+/**
+ * Marquee bands — mixed filled / outlined type, one lime accent band.
+ * Alternating scroll direction builds the kinetic poster.
+ */
+const BANDS = [
+  { text: 'REACT · NODE · MONGO', style: 'outline' as const, dir: -1 },
+  { text: 'FULLSTACK', style: 'fill' as const, dir: 1 },
+  { text: 'DESIGN · CODE · SHIP', style: 'signal' as const, dir: -1 },
+  { text: 'GSAP · THREE · R3F', style: 'outline' as const, dir: 1 },
+  { text: 'CAIRO — 2026', style: 'faint' as const, dir: -1 },
+];
 
 export default function Preloader() {
   const [visible, setVisible] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
+  const pctRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     if (!rootRef.current) return;
 
     const progress = { v: 0 };
-    const setGhost = () => {
-      if (ghostRef.current) ghostRef.current.textContent = String(Math.round(progress.v));
+    const setCount = () => {
+      const n = Math.round(progress.v);
+      if (ghostRef.current) ghostRef.current.textContent = String(n);
+      if (pctRef.current) pctRef.current.textContent = `${String(n).padStart(3, '0')}%`;
     };
-    setGhost();
+    setCount();
 
     const tl = gsap.timeline({ onComplete: () => setVisible(false) });
 
-    /* ============ ACT 1 — KINETIC WORD MONTAGE (hard slam cuts) ============ */
-    WORDS.forEach((_, i) => {
-      const t = 0.25 + i * 0.42;
-      tl.fromTo(`.title__word--${i}`,
-        { opacity: 0, scale: 1.18, filter: 'blur(6px)' },
-        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.16, ease: 'expo.out' }, t)
-        .to(`.title__word--${i}`,
-          { opacity: 0, duration: 0.08, ease: 'none' }, t + 0.34);
+    /* ═══════ PHASE 1 — REGISTRATION (the press aligns its plates) ═══════ */
+    tl.fromTo('.pl-grid-line',
+      { scaleY: 0, transformOrigin: '50% 0%' },
+      { scaleY: 1, duration: 0.5, stagger: 0.025, ease: 'expo.inOut' }, 0)
+      .fromTo('.pl-cross',
+        { scale: 0, rotate: -90, opacity: 0 },
+        { scale: 1, rotate: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(2)' }, 0.15)
+      .fromTo('.pl-label',
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: 0.06, ease: 'expo.out' }, 0.3);
+
+    /* ═══════ PHASE 2 — KINETIC CASCADE (bands fly in, alternating) ═══════ */
+    BANDS.forEach((b, i) => {
+      tl.fromTo(`.pl-band--${i} .pl-band__inner`,
+        { xPercent: b.dir * 55, filter: 'blur(14px)' },
+        { xPercent: b.dir * -6, filter: 'blur(0px)', duration: 1.15, ease: 'expo.out' }, 0.72 + i * 0.11)
+        .fromTo(`.pl-band--${i}`,
+          { opacity: 0, scaleY: 0.3, transformOrigin: '50% 50%' },
+          { opacity: 1, scaleY: 1, duration: 0.55, ease: 'expo.out' }, 0.72 + i * 0.11);
     });
-    tl.fromTo('.title__caption',
-      { opacity: 0 },
-      { opacity: 1, duration: 0.3, ease: 'none' }, 0.25);
+    // slow drift while they hold — keeps the frame alive
+    tl.to('.pl-band__inner', { xPercent: (i) => BANDS[i].dir * -11, duration: 0.9, ease: 'none' }, 1.9);
 
-    /* ============ ACT 2 — LOGOTYPE STAMP (letters slam in, brand ident) ============ */
-    tl.fromTo('.wm-letter',
-      { scale: 1.7, opacity: 0, transformOrigin: '50% 50%' },
-      { scale: 1, opacity: 1, duration: 0.38, stagger: 0.09, ease: 'expo.out' }, 1.75)
-      // impact shake as the last letter lands
-      .to('.title__mark', { x: 3, duration: 0.04 }, 2.2)
-      .to('.title__mark', { x: -2, duration: 0.04 }, 2.24)
-      .to('.title__mark', { x: 0, duration: 0.05 }, 2.28);
+    /* ═══════ PHASE 3 — COLLAPSE (bands crush into a single lime line) ═══════ */
+    tl.to('.pl-band', {
+      yPercent: (i) => (2 - i) * 115,
+      scaleY: 0,
+      opacity: 0,
+      duration: 0.5,
+      ease: 'expo.inOut',
+      stagger: { each: 0.03, from: 'edges' },
+    }, 2.62)
+      .to('.pl-grid-line', { opacity: 0, duration: 0.35 }, 2.62)
+      // the impact line
+      .fromTo('.pl-line',
+        { scaleX: 0, opacity: 1 },
+        { scaleX: 1, duration: 0.45, ease: 'expo.out' }, 2.72)
+      // soft flash on impact — two frames
+      .to('.pl-flash', { opacity: 0.22, duration: 0.05, ease: 'none' }, 3.04)
+      .to('.pl-flash', { opacity: 0, duration: 0.18, ease: 'none' }, 3.09);
 
-    /* ============ ACT 3 — THE SLASH (24° lime cut strikes the A) ============ */
-    tl.fromTo('.wm-cutrect',
-      { scaleX: 0, transformOrigin: '0% 50%' },
-      { scaleX: 1, duration: 0.32, ease: 'expo.inOut' }, 2.55)
+    /* ═══════ PHASE 4 — IGNITION (logotype unmasks out of the line) ═══════ */
+    tl.fromTo('.pl-mark-wrap',
+      { clipPath: 'inset(50% 0% 50% 0%)' },
+      { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.75, ease: 'expo.inOut' }, 3.1)
+      .fromTo('.pl-mark-wrap',
+        { scale: 1.12 },
+        { scale: 1, duration: 0.9, ease: 'expo.out' }, 3.1)
+      // the line retracts as the mark takes over
+      .to('.pl-line', { scaleX: 0, opacity: 0, duration: 0.5, ease: 'expo.inOut' }, 3.3)
+      // signature slash strikes through the A
+      .fromTo('.wm-cutrect',
+        { scaleX: 0, transformOrigin: '0% 50%' },
+        { scaleX: 1, duration: 0.3, ease: 'expo.inOut' }, 3.75)
       .fromTo('.wm-slash',
         { scaleX: 0, transformOrigin: '0% 50%' },
-        { scaleX: 1, duration: 0.32, ease: 'expo.inOut' }, 2.62)
-      // two-frame flicker on the slash — signal locked
-      .set('.wm-slash', { opacity: 0 }, 3.02)
-      .set('.wm-slash', { opacity: 1 }, 3.08)
-      .set('.wm-slash', { opacity: 0 }, 3.14)
-      .set('.wm-slash', { opacity: 1 }, 3.2)
-      // sub-line + rule + role
-      .fromTo('.title__sub span',
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.3, stagger: 0.04, ease: 'expo.out' }, 3.0)
-      .fromTo('.title__rule', { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: 'expo.inOut' }, 3.15)
-      .fromTo('.title__role span',
+        { scaleX: 1, duration: 0.3, ease: 'expo.inOut' }, 3.82)
+      .set('.wm-slash', { opacity: 0 }, 4.16)
+      .set('.wm-slash', { opacity: 1 }, 4.21)
+      .set('.wm-slash', { opacity: 0 }, 4.26)
+      .set('.wm-slash', { opacity: 1 }, 4.31)
+      // sub-line + role
+      .fromTo('.pl-sub span',
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.035, ease: 'expo.out' }, 3.95)
+      .fromTo('.pl-role span',
         { opacity: 0 },
-        { opacity: 1, duration: 0.04, stagger: 0.03, ease: 'none' }, 3.35);
+        { opacity: 1, duration: 0.04, stagger: 0.028, ease: 'none' }, 4.3);
 
-    /* ============ GHOST COUNTER (giant outline number behind) ============ */
-    tl.fromTo('.title__ghost', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.5)
-      .to(progress, { v: 100, duration: 2.5, ease: 'expo.inOut', onUpdate: setGhost }, 1.5);
+    /* ═══════ COUNTER — ghost outline + corner readout ═══════ */
+    tl.fromTo('.pl-ghost', { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.8)
+      .to(progress, { v: 100, duration: 3.5, ease: 'power2.inOut', onUpdate: setCount }, 0.8)
+      .to('.pl-ghost', { opacity: 0, duration: 0.5 }, 4.6);
 
-    /* ============ ACT 4 — LOUVER EXIT (five columns drop away) ============ */
-    tl.to('.title__content, .title__ghost, .title__caption',
-      { opacity: 0, y: -24, duration: 0.35, ease: 'expo.in', stagger: 0.05 }, 4.35)
-      .to('.title__col', {
-        yPercent: 100,
-        duration: 0.65,
+    /* ═══════ PHASE 5 — PORTAL EXIT (mark pushes past the frame) ═══════ */
+    tl.to('.pl-mark-wrap', { scale: 1.45, duration: 0.85, ease: 'expo.in' }, 5.6)
+      .to('.pl-sub, .pl-role, .pl-label', { opacity: 0, y: -18, duration: 0.3, ease: 'expo.in' }, 5.6)
+      .to('.pl-mark-wrap', { opacity: 0, duration: 0.35, ease: 'none' }, 6.07)
+      .to('.pl-mark, .pl-frame', { opacity: 0, duration: 0.3 }, 6.07)
+      .to('.pl-col', {
+        yPercent: -100,
+        duration: 0.7,
         ease: 'expo.inOut',
-        stagger: { each: 0.07, from: 'start' },
-      }, 4.7);
+        stagger: { each: 0.06, from: 'center' },
+      }, 6.15);
 
   }, { scope: rootRef });
 
   if (!visible) return null;
+
+  const bandStyle = (s: 'fill' | 'outline' | 'signal' | 'faint') => {
+    if (s === 'fill') return { color: INK };
+    if (s === 'signal') return { color: SIGNAL };
+    if (s === 'faint') return { color: 'rgba(244, 241, 234, 0.16)' };
+    return {
+      color: 'transparent',
+      WebkitTextStroke: '1.5px rgba(244, 241, 234, 0.55)',
+    };
+  };
 
   return (
     <div
@@ -94,37 +148,76 @@ export default function Preloader() {
       className="preloader"
       style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden' }}
     >
-      {/* Louver background columns (the actual canvas) */}
+      {/* Canvas columns — wipe away at the very end */}
       {COLUMNS.map((i) => (
         <div
           key={i}
-          className="title__col"
+          className="pl-col"
           style={{
             position: 'absolute',
-            top: 0,
+            top: '-1px',
             bottom: '-1px',
             left: `${i * 20}%`,
             width: '20.5%',
-            backgroundColor: '#080809',
+            backgroundColor: '#08080A',
           }}
         />
       ))}
 
-      {/* Giant ghost percentage — outlined, behind everything */}
+      {/* ── Registration frame: grid + corner marks + labels ── */}
+      <div className="pl-frame" style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none' }}>
+        {GRID.map((i) => (
+          <div
+            key={i}
+            className="pl-grid-line"
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: `${(i + 1) * (100 / 13)}%`,
+              width: '1px',
+              backgroundColor: 'rgba(244, 241, 234, 0.055)',
+            }}
+          />
+        ))}
+
+        {/* corner crosshairs */}
+        {[
+          { top: '2.4rem', left: '2.4rem' },
+          { top: '2.4rem', right: '2.4rem' },
+          { bottom: '2.4rem', left: '2.4rem' },
+          { bottom: '2.4rem', right: '2.4rem' },
+        ].map((pos, i) => (
+          <div key={i} className="pl-cross" style={{ position: 'absolute', width: '1.4rem', height: '1.4rem', ...pos }}>
+            <span style={{ position: 'absolute', top: '50%', left: 0, width: '100%', height: '1px', backgroundColor: SIGNAL }} />
+            <span style={{ position: 'absolute', left: '50%', top: 0, height: '100%', width: '1px', backgroundColor: SIGNAL }} />
+          </div>
+        ))}
+      </div>
+
+      {/* ── Corner labels ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', fontFamily: MONO, fontSize: '1.05rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(244, 241, 234, 0.45)' }}>
+        <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', left: '5.2rem' }}>Shahd Khairy</div>
+        <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', right: '5.2rem' }}>Portfolio / 2026</div>
+        <div className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', left: '5.2rem' }}>Cairo — EG</div>
+        <div ref={pctRef} className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', right: '5.2rem', color: SIGNAL, fontVariantNumeric: 'tabular-nums' }}>000%</div>
+      </div>
+
+      {/* ── Ghost counter ── */}
       <div
         ref={ghostRef}
-        className="title__ghost"
+        className="pl-ghost"
         style={{
           position: 'absolute',
           inset: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 'clamp(24rem, 46vw, 64rem)',
+          fontSize: 'clamp(24rem, 48vw, 66rem)',
           fontWeight: 800,
           letterSpacing: '-0.04em',
           color: 'transparent',
-          WebkitTextStroke: '1px rgba(244, 241, 234, 0.10)',
+          WebkitTextStroke: '1px rgba(244, 241, 234, 0.075)',
           lineHeight: 1,
           zIndex: 1,
           pointerEvents: 'none',
@@ -135,56 +228,67 @@ export default function Preloader() {
         0
       </div>
 
-      {/* Kinetic word montage — stacked, hard cuts */}
-      {WORDS.map((w, i) => (
-        <div
-          key={w}
-          className={`title__word title__word--${i}`}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 'clamp(6rem, 14vw, 18rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.03em',
-            textTransform: 'uppercase',
-            color: INK,
-            opacity: 0,
-            zIndex: 3,
-            pointerEvents: 'none',
-          }}
-        >
-          {w}
-          <span style={{ color: SIGNAL }}>.</span>
-        </div>
-      ))}
-
-      {/* Caption — top center, mono */}
-      <div
-        className="title__caption"
-        style={{
-          position: 'absolute',
-          top: '3.4rem',
-          left: 0,
-          width: '100%',
-          textAlign: 'center',
-          fontFamily: MONO,
-          fontSize: '1.2rem',
-          letterSpacing: '0.3em',
-          color: 'rgba(244, 241, 234, 0.5)',
-          textTransform: 'uppercase',
-          zIndex: 3,
-          opacity: 0,
-        }}
-      >
-        LOADING — PORTFOLIO 2026
+      {/* ── Kinetic marquee bands ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}>
+        {BANDS.map((b, i) => (
+          <div
+            key={i}
+            className={`pl-band pl-band--${i}`}
+            style={{
+              position: 'absolute',
+              left: '-10%',
+              width: '120%',
+              top: `${13.5 + i * 15}%`,
+              height: '13%',
+              display: 'flex',
+              alignItems: 'center',
+              overflow: 'hidden',
+              opacity: 0,
+            }}
+          >
+            <div
+              className="pl-band__inner"
+              style={{
+                display: 'flex',
+                gap: '3ch',
+                whiteSpace: 'nowrap',
+                fontSize: 'clamp(3.6rem, 8.4vw, 10rem)',
+                fontWeight: 800,
+                letterSpacing: '-0.03em',
+                lineHeight: 1,
+                textTransform: 'uppercase',
+                ...bandStyle(b.style),
+              }}
+            >
+              <span>{b.text}</span>
+              <span>{b.text}</span>
+              <span>{b.text}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Main composition */}
+      {/* ── Impact line ── */}
       <div
-        className="title__content"
+        className="pl-line"
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '8%',
+          width: '84%',
+          height: '2px',
+          backgroundColor: SIGNAL,
+          transform: 'scaleX(0)',
+          transformOrigin: 'center',
+          opacity: 0,
+          zIndex: 5,
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* ── Logotype end-card ── */}
+      <div
+        className="pl-mark"
         style={{
           position: 'absolute',
           inset: 0,
@@ -192,23 +296,25 @@ export default function Preloader() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '3rem',
-          zIndex: 2,
+          gap: '2.6rem',
+          zIndex: 6,
+          pointerEvents: 'none',
         }}
       >
-        {/* SHAHD logotype — vector, stamps in letter by letter */}
-        <div className="title__mark" style={{ width: 'min(58rem, 74vw)' }}>
+        <div
+          className="pl-mark-wrap"
+          style={{ width: 'min(56rem, 72vw)', clipPath: 'inset(50% 0% 50% 0%)' }}
+        >
           <Wordmark id="ldr" drawable />
         </div>
 
-        {/* KHAIRY sub-line — letterspaced mono */}
         <div
-          className="title__sub"
+          className="pl-sub"
           style={{
             display: 'flex',
             fontFamily: MONO,
-            fontSize: '1.7rem',
-            letterSpacing: '1.6em',
+            fontSize: '1.6rem',
+            letterSpacing: '1.5em',
             textIndent: '0.4em',
             color: INK,
             opacity: 0.9,
@@ -220,28 +326,15 @@ export default function Preloader() {
           ))}
         </div>
 
-        {/* Baseline rule */}
         <div
-          className="title__rule"
+          className="pl-role"
           style={{
-            width: 'min(52rem, 72vw)',
-            height: '1px',
-            backgroundColor: 'rgba(244, 241, 234, 0.25)',
-            transform: 'scaleX(0)',
-            transformOrigin: 'center',
-          }}
-        />
-
-        {/* Role — mono type-on */}
-        <div
-          className="title__role"
-          style={{
+            display: 'flex',
             fontFamily: MONO,
-            fontSize: '1.3rem',
+            fontSize: '1.25rem',
             letterSpacing: '0.4em',
             color: SIGNAL,
             textTransform: 'uppercase',
-            display: 'flex',
           }}
         >
           {'FULL STACK DEVELOPER'.split('').map((c, i) => (
@@ -249,6 +342,19 @@ export default function Preloader() {
           ))}
         </div>
       </div>
+
+      {/* ── Impact flash ── */}
+      <div
+        className="pl-flash"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: INK,
+          opacity: 0,
+          zIndex: 7,
+          pointerEvents: 'none',
+        }}
+      />
     </div>
   );
 }
