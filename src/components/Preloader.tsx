@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { SKMonogram } from './LogoMark';
 
 gsap.registerPlugin(useGSAP);
 
@@ -67,53 +68,78 @@ export default function Preloader() {
       onComplete: () => setVisible(false),
     });
 
+    /* ============ ACT 0 — SIGNATURE (logo build) ============ */
+    // The SK monogram draws itself on stroke by stroke like a signature.
+    const strokes = gsap.utils.toArray<SVGPathElement>('.logo-stroke');
+    strokes.forEach((path) => {
+      const len = path.getTotalLength();
+      gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
+    });
+    tl.to(strokes, {
+      strokeDashoffset: 0,
+      duration: 0.55,
+      stagger: 0.28,
+      ease: 'power2.inOut',
+    }, 0.2)
+      // spark pops at the K's joint
+      .fromTo('.logo-spark',
+        { scale: 0, transformOrigin: 'center', opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.6, ease: 'elastic.out(1.2, 0.4)' }, 1.35)
+      // wordmark letters rise in under the mark
+      .fromTo('.forge__wordmark .forge-letter',
+        { yPercent: 120, opacity: 0 },
+        { yPercent: 0, opacity: 1, duration: 0.45, stagger: 0.03, ease: 'power2.out' }, 1.1)
+      // hold, then hand off: monogram + wordmark lift away…
+      .to('.forge__logo', { y: -40, opacity: 0, scale: 0.92, duration: 0.5, ease: 'power2.in' }, 2.35);
+
     /* ============ ACT 1 — IGNITION ============ */
+    // …and the spark's energy becomes the forge star.
     tl.fromTo('.forge__star',
       { scale: 0, rotation: -90, opacity: 0 },
-      { scale: 1, rotation: 0, opacity: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)' }, 0.15)
+      { scale: 1, rotation: 0, opacity: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)' }, 2.6)
       .fromTo('.forge__glow',
         { scale: 0.2, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1, ease: 'power2.out' }, 0.15);
+        { scale: 1, opacity: 1, duration: 1, ease: 'power2.out' }, 2.6);
 
     /* Star breathing + slow spin for the whole forge phase */
-    tl.to('.forge__star', { rotation: 150, duration: 2.6, ease: 'none' }, 0.9)
-      .to('.forge__star', { scale: 1.12, duration: 0.65, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 0.9);
+    tl.to('.forge__star', { rotation: 150, duration: 2.6, ease: 'none' }, 3.35)
+      .to('.forge__star', { scale: 1.12, duration: 0.65, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 3.35);
 
     /* ============ ACT 2 — FORGE ============ */
     // Star-shaped shockwave rings
     tl.fromTo('.forge__wave',
       { scale: 0.4, opacity: 0.7 },
-      { scale: 7, opacity: 0, rotation: 45, duration: 1.7, ease: 'power1.out', stagger: 0.55 }, 0.9);
+      { scale: 7, opacity: 0, rotation: 45, duration: 1.7, ease: 'power1.out', stagger: 0.55 }, 3.35);
 
     // Orbiting particles: ring fades in and rotates
     tl.fromTo('.forge__orbit',
       { opacity: 0, rotation: 0 },
-      { opacity: 1, rotation: 240, duration: 2.6, ease: 'power1.inOut' }, 0.9)
-      .to('.forge__orbit', { opacity: 0, duration: 0.3 }, 3.1);
+      { opacity: 1, rotation: 240, duration: 2.6, ease: 'power1.inOut' }, 3.35)
+      .to('.forge__orbit', { opacity: 0, duration: 0.3 }, 5.55);
 
     // Labels letter-stagger in
     tl.fromTo('.forge__label .forge-letter',
       { yPercent: 120, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 1.0);
+      { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 3.45);
 
     // Counter 0 -> 100 with rolling digit strips
-    tl.fromTo('.forge__counter', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0.9);
-    tl.to(progress, { v: 100, duration: 2.1, ease: 'power2.inOut', onUpdate: setCounter }, 1.05);
+    tl.fromTo('.forge__counter', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 3.35);
+    tl.to(progress, { v: 100, duration: 2.1, ease: 'power2.inOut', onUpdate: setCounter }, 3.5);
 
     // Progress hairline
-    tl.fromTo('.forge__bar', { scaleX: 0 }, { scaleX: 1, duration: 2.25, ease: 'power2.inOut' }, 1.0);
+    tl.fromTo('.forge__bar', { scaleX: 0 }, { scaleX: 1, duration: 2.25, ease: 'power2.inOut' }, 3.45);
 
     /* ============ ACT 3 — SUPERNOVA EXIT ============ */
     tl.to('.forge__label .forge-letter',
-      { yPercent: -120, opacity: 0, duration: 0.35, stagger: 0.015, ease: 'power2.in' }, 3.2)
-      .to('.forge__counter', { y: -40, opacity: 0, duration: 0.35, ease: 'power2.in' }, 3.2)
-      .to('.forge__bar', { opacity: 0, duration: 0.25 }, 3.25)
-      .to('.forge__glow', { opacity: 0, duration: 0.4 }, 3.3)
+      { yPercent: -120, opacity: 0, duration: 0.35, stagger: 0.015, ease: 'power2.in' }, 5.65)
+      .to('.forge__counter', { y: -40, opacity: 0, duration: 0.35, ease: 'power2.in' }, 5.65)
+      .to('.forge__bar', { opacity: 0, duration: 0.25 }, 5.7)
+      .to('.forge__glow', { opacity: 0, duration: 0.4 }, 5.75)
       // the star detonates
-      .to('.forge__star', { scale: 34, rotation: 225, duration: 0.75, ease: 'power4.in' }, 3.3)
-      .fromTo('.forge__flash', { opacity: 0 }, { opacity: 0.9, duration: 0.28, ease: 'power2.in' }, 3.62)
-      .to('.forge__flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, 3.9)
-      .to(rootRef.current, { opacity: 0, duration: 0.4, ease: 'power1.out' }, 3.85);
+      .to('.forge__star', { scale: 34, rotation: 225, duration: 0.75, ease: 'power4.in' }, 5.75)
+      .fromTo('.forge__flash', { opacity: 0 }, { opacity: 0.9, duration: 0.28, ease: 'power2.in' }, 6.07)
+      .to('.forge__flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, 6.35)
+      .to(rootRef.current, { opacity: 0, duration: 0.4, ease: 'power1.out' }, 6.3);
 
   }, { scope: rootRef });
 
@@ -212,8 +238,48 @@ export default function Preloader() {
         ))}
       </div>
 
+      {/* ACT 0 — the signature logo build */}
+      <div
+        className="forge__logo"
+        style={{
+          position: 'absolute',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '2.4rem',
+          zIndex: 2,
+        }}
+      >
+        <div style={{ width: '17rem' }}>
+          <SKMonogram size="100%" strokeWidth={4.5} drawable />
+        </div>
+        <div
+          className="forge__wordmark"
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '0.55em',
+            fontSize: '1.7rem',
+            color: 'var(--white)',
+            textTransform: 'uppercase',
+            overflow: 'hidden',
+          }}
+        >
+          <span style={{ fontWeight: 800, letterSpacing: '0.14em', display: 'inline-flex' }}>
+            {'SHAHD'.split('').map((c, i) => (
+              <span key={i} className="forge-letter" style={{ display: 'inline-block' }}>{c}</span>
+            ))}
+          </span>
+          <span style={{ fontWeight: 300, letterSpacing: '0.24em', opacity: 0.85, display: 'inline-flex' }}>
+            {'KHAIRY'.split('').map((c, i) => (
+              <span key={i} className="forge-letter" style={{ display: 'inline-block' }}>{c}</span>
+            ))}
+          </span>
+        </div>
+      </div>
+
       {/* The star */}
-      <div className="forge__star" style={{ position: 'relative', willChange: 'transform', filter: 'drop-shadow(0 0 3rem rgba(210, 189, 248, 0.55))' }}>
+      <div className="forge__star" style={{ position: 'relative', willChange: 'transform', filter: 'drop-shadow(0 0 3rem rgba(210, 189, 248, 0.55))', opacity: 0 }}>
         <Star size="14rem" color="#D2BDF8" />
       </div>
 
