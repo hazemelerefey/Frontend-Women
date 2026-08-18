@@ -56,7 +56,7 @@ export default function LinksBar() {
         }}
       >
         {links.map((link, idx) => (
-          <span key={link.label} style={{ display: 'block', overflow: 'hidden' }}>
+          <span key={link.label} style={{ display: 'block', overflow: 'hidden', maxWidth: '100%' }}>
             <a
               className="links-bar__item"
               href={link.href}
@@ -66,7 +66,7 @@ export default function LinksBar() {
               onMouseLeave={() => setHoveredIdx(null)}
               style={{
                 display: 'block',
-                fontSize: 'clamp(4rem, 9.5vw, 13.5rem)',
+                fontSize: 'clamp(2.6rem, 9.5vw, 13.5rem)',
                 lineHeight: 1.05,
                 fontWeight: 500,
                 letterSpacing: '-0.03em',
@@ -74,6 +74,7 @@ export default function LinksBar() {
                 textDecoration: 'none',
                 transition: 'color 0.3s ease',
                 fontFamily: 'inherit',
+                wordBreak: 'break-word',
               }}
             >
               {link.label}

@@ -126,6 +126,11 @@ body {
   line-height: 1.07;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 .center-wrap {
