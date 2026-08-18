@@ -1,7 +1,7 @@
 /**
- * SHAHD logotype — Inter Tight 800 glyph outlines extracted to raw vector
- * paths (fontkit), tracked tight at -4.5% em. Baseline at y=0 in glyph
- * space; render with translate(dx, 72.75).
+ * SHAHD KHAIRY logotype — Inter Tight 800 glyph outlines extracted to raw
+ * vector paths (fontkit), tracked tight at -4.5% em. Baseline sits at y=0 in
+ * glyph space; render with translate(0, LOGO_HEIGHT).
  * Generated — do not hand-edit path data.
  */
 
@@ -11,10 +11,10 @@ export interface LogoLetter {
   d: string;
 }
 
-export const LOGO_WIDTH = 333.66;
 export const LOGO_HEIGHT = 72.75;
 
-export const LOGO_LETTERS: LogoLetter[] = [
+export const SHAHD_WIDTH = 333.66;
+export const SHAHD_LETTERS: LogoLetter[] = [
   {
     "char": "S",
     "dx": 0,
@@ -41,3 +41,45 @@ export const LOGO_LETTERS: LogoLetter[] = [
     "d": "M294.5 0L275.07 0L275.07 -14.99L293.77 -14.99Q299.92 -14.99 304.17 -17.07Q308.42 -19.14 310.61 -23.83Q312.81 -28.52 312.81 -36.38Q312.81 -44.24 310.61 -48.93Q308.42 -53.61 304.09 -55.69Q299.77 -57.76 293.47 -57.76L274.77 -57.76L274.77 -72.75L294.45 -72.75Q305.58 -72.75 313.62 -68.38Q321.65 -64.01 325.99 -55.86Q330.34 -47.71 330.34 -36.38Q330.34 -25.05 325.99 -16.87Q321.65 -8.69 313.62 -4.35Q305.58 0 294.5 0ZM285.13 -72.75L285.13 0L267.6 0L267.6 -72.75Z"
   }
 ];
+
+export const KHAIRY_WIDTH = 348.89;
+export const KHAIRY_LETTERS: LogoLetter[] = [
+  {
+    "char": "K",
+    "dx": 0,
+    "d": "M4.1 0L4.1 -72.75L21.63 -72.75L21.63 -41.99L22.61 -41.99L46.63 -72.75L67.38 -72.75L41.6 -40.23L67.82 0L46.78 0L28.71 -28.56L21.63 -19.73L21.63 0Z"
+  },
+  {
+    "char": "H",
+    "dx": 62.93,
+    "d": "M67.03 0L67.03 -72.75L84.56 -72.75L84.56 -43.55L113.27 -43.55L113.27 -72.75L130.8 -72.75L130.8 0L113.27 0L113.27 -29.25L84.56 -29.25L84.56 0Z"
+  },
+  {
+    "char": "A",
+    "dx": 130.4,
+    "d": "M150.18 0L131.28 0L155.89 -72.75L179.23 -72.75L203.79 0L184.95 0L167.86 -54.44L167.27 -54.44ZM147.74 -28.66L187.24 -28.66L187.24 -15.28L147.74 -15.28Z"
+  },
+  {
+    "char": "I",
+    "dx": 200.22,
+    "d": "M221.85 -72.75L221.85 0L204.32 0L204.32 -72.75Z"
+  },
+  {
+    "char": "R",
+    "dx": 221.45,
+    "d": "M225.55 0L225.55 -72.75L255.54 -72.75Q263.74 -72.75 269.7 -69.8Q275.65 -66.85 278.9 -61.4Q282.15 -55.96 282.15 -48.54Q282.15 -40.97 278.85 -35.69Q275.55 -30.42 269.45 -27.66Q263.35 -24.9 255.05 -24.9L236.05 -24.9L236.05 -38.77L251.78 -38.77Q255.73 -38.77 258.44 -39.79Q261.15 -40.82 262.54 -42.99Q263.93 -45.17 263.93 -48.54Q263.93 -51.9 262.54 -54.13Q261.15 -56.35 258.44 -57.45Q255.73 -58.54 251.73 -58.54L243.08 -58.54L243.08 0ZM265.4 0L247.67 -33.25L266.47 -33.25L284.64 0Z"
+  },
+  {
+    "char": "Y",
+    "dx": 277.21,
+    "d": "M277.65 -72.75L297.32 -72.75L312.66 -42.29L313.34 -42.29L328.77 -72.75L348.35 -72.75L321.74 -24.27L321.74 0L304.31 0L304.31 -24.27Z"
+  }
+];
+
+/** Enclosed counter of the A in SHAHD — where the keystone sits (rendered coords) */
+export const A_COUNTER = {
+  x: 143.54,
+  y: 44.09,
+  w: 39.5,
+  h: 13.38,
+};
