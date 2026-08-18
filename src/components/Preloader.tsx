@@ -33,17 +33,13 @@ export default function Preloader() {
       .fromTo('.boot__bracket', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'expo.out', stagger: 0.06 }, 0.35)
       .fromTo('.boot__hud', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', stagger: 0.08 }, 0.55);
 
-    /* ============ PHASE 2 — SIGNATURE (logo draws) ============ */
-    const strokes = gsap.utils.toArray<SVGPathElement>('.logo-stroke');
-    strokes.forEach((path) => {
-      const len = path.getTotalLength();
-      gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
-    });
-    tl.to(strokes, { strokeDashoffset: 0, duration: 0.5, stagger: 0.22, ease: 'power3.inOut' }, 0.7)
-      .fromTo('.logo-spark',
-        { scale: 0, transformOrigin: 'center', opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(3)' }, 1.7)
-      // shine sweep across the mark — a single hard cut of light
+    /* ============ PHASE 2 — MARK ASSEMBLY (pieces cut in) ============ */
+    // The monogram's six vector pieces wipe on sequentially — blue arc
+    // system first, then the pink wedge system.
+    tl.fromTo('.logo-piece',
+      { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
+      { clipPath: 'inset(0 0% 0 0)', opacity: 1, duration: 0.45, stagger: 0.16, ease: 'expo.inOut' }, 0.7)
+      // shine sweep across the assembled mark — a single hard cut of light
       .fromTo('.boot__shine', { xPercent: -160 }, { xPercent: 160, duration: 0.6, ease: 'power2.inOut' }, 1.85);
 
     /* ============ PHASE 3 — NAME (panel wipe) ============ */

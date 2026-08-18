@@ -1,82 +1,54 @@
 /**
- * SHAHD KHAIRY brand identity.
- *
- * The mark is an "SK" ligature drawn as continuous gradient strokes
- * (sky -> lavender, round caps) with the brand's four-pointed star set
- * as a spark at the K's joint — the same star that drives the site's
- * section transitions.
+ * SHAHD KHAIRY brand identity — user-supplied SK monogram (vector trace),
+ * recolored to the site palette. Blue arc system forms the S, pink wedge
+ * system forms the K.
  */
+
+const BLUE_PATHS = [
+  'M 617.00,33.00 L 576.00,37.00 L 520.00,48.00 L 472.00,62.00 L 425.00,80.00 L 375.00,104.00 L 330.00,131.00 L 288.00,161.00 L 248.00,195.00 L 198.00,247.00 L 171.00,281.00 L 130.00,342.00 L 104.00,392.00 L 85.00,437.00 L 68.00,491.00 L 56.00,548.00 L 51.00,595.00 L 51.00,642.00 L 53.00,655.00 L 259.00,655.00 L 301.00,657.00 L 373.00,664.00 L 410.00,670.00 L 458.00,681.00 L 492.00,694.00 L 511.00,706.00 L 524.00,720.00 L 529.00,730.00 L 532.00,743.00 L 531.00,937.00 L 521.00,936.00 L 472.00,921.00 L 424.00,900.00 L 379.00,872.00 L 353.00,851.00 L 332.00,831.00 L 310.00,806.00 L 289.00,775.00 L 270.00,736.00 L 263.00,715.00 L 260.00,699.00 L 192.00,699.00 L 196.00,722.00 L 205.00,751.00 L 220.00,786.00 L 237.00,816.00 L 277.00,868.00 L 326.00,914.00 L 379.00,951.00 L 437.00,980.00 L 497.00,1001.00 L 529.00,1009.00 L 585.00,1019.00 L 595.00,1019.00 L 595.00,724.00 L 590.00,703.00 L 581.00,685.00 L 563.00,663.00 L 544.00,649.00 L 514.00,634.00 L 467.00,619.00 L 429.00,611.00 L 354.00,601.00 L 278.00,596.00 L 127.00,596.00 L 119.00,594.00 L 119.00,583.00 L 125.00,537.00 L 135.00,493.00 L 147.00,456.00 L 161.00,422.00 L 194.00,359.00 L 230.00,307.00 L 261.00,270.00 L 302.00,229.00 L 344.00,195.00 L 394.00,163.00 L 426.00,147.00 L 488.00,123.00 L 524.00,113.00 L 573.00,104.00 L 617.00,100.00 Z',
+  'M 611.00,177.00 L 574.00,182.00 L 535.00,191.00 L 503.00,201.00 L 457.00,220.00 L 398.00,253.00 L 373.00,270.00 L 342.00,295.00 L 290.00,348.00 L 260.00,387.00 L 230.00,435.00 L 211.00,474.00 L 195.00,518.00 L 188.00,550.00 L 272.00,550.00 L 346.00,553.00 L 415.00,560.00 L 473.00,570.00 L 516.00,582.00 L 561.00,602.00 L 592.00,624.00 L 612.00,646.00 L 626.00,673.00 L 632.00,703.00 L 632.00,1162.00 L 682.00,1160.00 L 689.00,1158.00 L 689.00,664.00 L 682.00,637.00 L 673.00,618.00 L 647.00,585.00 L 618.00,561.00 L 580.00,539.00 L 530.00,520.00 L 479.00,508.00 L 412.00,498.00 L 358.00,493.00 L 278.00,489.00 L 282.00,475.00 L 311.00,422.00 L 344.00,378.00 L 378.00,343.00 L 420.00,310.00 L 451.00,291.00 L 501.00,268.00 L 524.00,260.00 L 553.00,253.00 L 555.00,278.00 L 555.00,477.00 L 581.00,490.00 L 618.00,514.00 L 618.00,178.00 Z',
+  'M 60.00,699.00 L 69.00,741.00 L 83.00,786.00 L 100.00,827.00 L 123.00,870.00 L 147.00,907.00 L 179.00,948.00 L 204.00,976.00 L 247.00,1018.00 L 291.00,1053.00 L 330.00,1079.00 L 360.00,1096.00 L 414.00,1121.00 L 460.00,1137.00 L 506.00,1149.00 L 552.00,1157.00 L 593.00,1160.00 L 594.00,1110.00 L 592.00,1085.00 L 573.00,1084.00 L 524.00,1076.00 L 490.00,1068.00 L 441.00,1052.00 L 410.00,1039.00 L 372.00,1020.00 L 343.00,1003.00 L 314.00,983.00 L 275.00,951.00 L 239.00,915.00 L 210.00,881.00 L 193.00,857.00 L 169.00,817.00 L 150.00,777.00 L 134.00,730.00 L 128.00,699.00 Z',
+];
+
+const PINK_PATHS = [
+  'M 1051.00,225.00 L 837.00,497.00 L 706.00,656.00 L 706.00,748.00 L 723.00,730.00 L 787.00,654.00 L 790.00,654.00 L 893.00,782.00 L 1052.00,986.00 L 1090.00,948.00 L 1125.00,904.00 L 1158.00,851.00 L 1177.00,812.00 L 1194.00,767.00 L 1209.00,707.00 L 1216.00,648.00 L 1217.00,597.00 L 1214.00,556.00 L 1208.00,514.00 L 1194.00,458.00 L 1177.00,410.00 L 1159.00,371.00 L 1126.00,315.00 L 1090.00,267.00 Z M 1050.00,323.00 L 1054.00,325.00 L 1067.00,342.00 L 1088.00,375.00 L 1107.00,411.00 L 1120.00,441.00 L 1132.00,476.00 L 1143.00,519.00 L 1152.00,586.00 L 1152.00,640.00 L 1148.00,678.00 L 1142.00,710.00 L 1131.00,750.00 L 1116.00,789.00 L 1099.00,824.00 L 1074.00,864.00 L 1057.00,886.00 L 1054.00,886.00 L 934.00,732.00 L 830.00,602.00 L 831.00,598.00 L 917.00,493.00 Z',
+  'M 659.00,33.00 L 657.00,540.00 L 658.00,547.00 L 692.00,583.00 L 855.00,381.00 L 1007.00,182.00 L 970.00,151.00 L 934.00,126.00 L 895.00,103.00 L 838.00,76.00 L 791.00,59.00 L 752.00,48.00 L 704.00,38.00 Z M 724.00,107.00 L 757.00,114.00 L 793.00,125.00 L 849.00,148.00 L 902.00,178.00 L 921.00,192.00 L 921.00,195.00 L 774.00,386.00 L 726.00,446.00 L 719.00,451.00 L 718.00,108.00 Z',
+  'M 780.00,718.00 L 740.00,763.00 L 741.00,766.00 L 922.00,998.00 L 922.00,1001.00 L 902.00,1015.00 L 871.00,1033.00 L 817.00,1058.00 L 764.00,1075.00 L 707.00,1086.00 L 707.00,1157.00 L 753.00,1149.00 L 788.00,1140.00 L 819.00,1130.00 L 863.00,1112.00 L 931.00,1076.00 L 983.00,1040.00 L 1012.00,1016.00 L 869.00,830.00 Z',
+];
 
 export function SKMonogram({
   size = 48,
-  strokeWidth = 5,
   drawable = false,
 }: {
   size?: number | string;
   strokeWidth?: number;
   drawable?: boolean;
 }) {
-  const cls = drawable ? 'logo-stroke' : undefined;
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 76 48"
+      viewBox="0 0 1277 1231"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ display: 'block', overflow: 'visible' }}
     >
       <defs>
-        <linearGradient id="sk-grad" x1="0" y1="0" x2="76" y2="48" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#94BDF7" />
-          <stop offset="1" stopColor="#D2BDF8" />
+        <linearGradient id="sk-blue" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stopColor="#94BDF7" />
+          <stop offset="100%" stopColor="#B4CDF8" />
+        </linearGradient>
+        <linearGradient id="sk-pink" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stopColor="#D2BDF8" />
+          <stop offset="100%" stopColor="#C89BF5" />
         </linearGradient>
       </defs>
-
-      {/* S — two-bowl calligraphic stroke */}
-      <path
-        className={cls}
-        d="M29 10 C29 3.5, 8 3.5, 8 11.5 C8 20, 29 17.5, 29 26.5 C29 35.5, 7 35.5, 7 28.5"
-        stroke="url(#sk-grad)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* K — spine */}
-      <path
-        className={cls}
-        d="M42 5.5 L42 42.5"
-        stroke="url(#sk-grad)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* K — upper arm */}
-      <path
-        className={cls}
-        d="M66 5.5 L42.5 25.5"
-        stroke="url(#sk-grad)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* K — lower leg */}
-      <path
-        className={cls}
-        d="M50 19 L68 42.5"
-        stroke="url(#sk-grad)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        fill="none"
-      />
-
-      {/* Star spark at the joint */}
-      <g className={drawable ? 'logo-spark' : undefined} transform="translate(50.5, 12)">
-        <path
-          d="M0 -7 L1.4 -1.4 L7 0 L1.4 1.4 L0 7 L-1.4 1.4 L-7 0 L-1.4 -1.4 Z"
-          fill="#D2BDF8"
-        />
-      </g>
+      {BLUE_PATHS.map((d, i) => (
+        <path key={`b${i}`} className={drawable ? 'logo-piece' : undefined} d={d} fill="url(#sk-blue)" fillRule="evenodd" />
+      ))}
+      {PINK_PATHS.map((d, i) => (
+        <path key={`p${i}`} className={drawable ? 'logo-piece' : undefined} d={d} fill="url(#sk-pink)" fillRule="evenodd" />
+      ))}
     </svg>
   );
 }
@@ -85,8 +57,8 @@ export function SKMonogram({
 export default function LogoMark() {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '1.2rem' }}>
-      <span style={{ width: '3.6rem', height: 'auto', display: 'inline-flex' }}>
-        <SKMonogram size="100%" strokeWidth={5.5} />
+      <span style={{ width: '3.4rem', height: 'auto', display: 'inline-flex' }}>
+        <SKMonogram size="100%" />
       </span>
       <span
         style={{
