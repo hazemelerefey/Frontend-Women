@@ -3,13 +3,12 @@
 import { useState, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { Wordmark, INK } from './LogoMark';
+import { INK } from './LogoMark';
 import { SHAHD_LETTERS, SHAHD_WIDTH, LOGO_HEIGHT } from './logo-paths';
 
 gsap.registerPlugin(useGSAP);
 
 const MONO = "'IBM Plex Mono', monospace";
-const COLUMNS = [0, 1, 2, 3, 4];
 const GRID = Array.from({ length: 12 }, (_, i) => i);
 const CANVAS = '#0C0C0C';
 
@@ -25,6 +24,16 @@ const BANDS = [
   { text: 'CAIRO — 2026', style: 'faint' as const, dir: -1 },
 ];
 
+/**
+ * One continuous cinematic take.
+ *
+ * The whole scene is staged on a single opaque panel that never fades — it is
+ * the canvas from the first frame. SHAHD is not drawn on top of it; the word is
+ * cut *out* of it, so there is only ever one SHAHD and it is a window from the
+ * instant it exists. It materialises as the marquee dissolves, the hero
+ * develops inside it, and then one master motion opens it all the way out.
+ * Nothing is layered in or swapped, so no phase begins with a cut.
+ */
 export default function Preloader() {
   const [visible, setVisible] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -32,7 +41,8 @@ export default function Preloader() {
   const pctRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!rootRef.current) return;
+    const root = rootRef.current;
+    if (!root) return;
 
     const progress = { v: 0 };
     const setCount = () => {
@@ -42,108 +52,134 @@ export default function Preloader() {
     };
     setCount();
 
-    const tl = gsap.timeline({ onComplete: () => setVisible(false) });
-
-    /* ═══════ PHASE 1 — REGISTRATION (the press aligns its plates) ═══════ */
-    tl.fromTo('.pl-grid-line',
-      { scaleY: 0, transformOrigin: '50% 0%' },
-      { scaleY: 1, duration: 0.55, stagger: 0.025, ease: 'power2.inOut' }, 0)
-      .fromTo('.pl-cross',
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.5, stagger: 0.06, ease: 'power3.out' }, 0.15)
-      .fromTo('.pl-label',
-        { opacity: 0, y: 8 },
-        { opacity: 1, y: 0, duration: 0.4, stagger: 0.06, ease: 'power2.out' }, 0.3);
-
-    /* ═══════ PHASE 2 — KINETIC CASCADE (bands drift in, alternating) ═══════ */
-    BANDS.forEach((b, i) => {
-      tl.fromTo(`.pl-band--${i} .pl-band__inner`,
-        { xPercent: b.dir * 55, filter: 'blur(16px)' },
-        { xPercent: b.dir * -6, filter: 'blur(0px)', duration: 1.3, ease: 'power3.out' }, 0.72 + i * 0.11)
-        .fromTo(`.pl-band--${i}`,
-          { opacity: 0, scaleY: 0.4, transformOrigin: '50% 50%' },
-          { opacity: 1, scaleY: 1, duration: 0.7, ease: 'power2.out' }, 0.72 + i * 0.11);
-    });
-    tl.to('.pl-band__inner', { xPercent: (i) => BANDS[i].dir * -12, duration: 1.1, ease: 'none' }, 1.9);
-
-    /* ═══════ PHASE 3 — FLUID GATHER ═══════
-       No hard line, no snap. The bands soften, swell and drift together into
-       the middle, dissolving into light as the name grows out of them.        */
-    tl.to('.pl-band', {
-      y: (i) => (2 - i) * -6 + 'vh',
-      scaleY: 1.35,
-      scaleX: 1.06,
-      filter: 'blur(26px)',
-      opacity: 0,
-      duration: 1.1,
-      ease: 'power2.inOut',
-      stagger: { each: 0.055, from: 'edges' },
-    }, 2.6)
-      .to('.pl-grid-line', { opacity: 0, duration: 0.8, ease: 'power2.inOut' }, 2.7)
-      // a slow bloom breathes through the middle of the gather
-      .to('.pl-bloom', { opacity: 0.5, duration: 0.75, ease: 'sine.inOut' }, 2.75)
-      .to('.pl-bloom', { opacity: 0, duration: 0.9, ease: 'sine.inOut' }, 3.5);
-
-    /* ═══════ COUNTER ═══════ */
-    tl.fromTo('.pl-ghost', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 0.8)
-      .to(progress, { v: 100, duration: 3.6, ease: 'power2.inOut', onUpdate: setCount }, 0.8)
-      .to('.pl-ghost', { opacity: 0, duration: 0.7, ease: 'power2.inOut' }, 4.3);
-
-    /* ═══════ PHASE 5 — THE PORTAL ═══════
-       The letters stop being ivory and become windows: the same SHAHD is cut
-       out of the cover, so the hero shows through the letterforms. Then the
-       cut-out swells until the hero has opened all the way out.              */
-
-    // Cut the letters out of a full-viewport panel, lined up pixel-for-pixel
-    // with the ivory mark it replaces. even-odd turns the letterforms into
-    // holes, so the hero shows through them like windows.
+    /* ── Size the panel and place the one-and-only SHAHD ──
+       Geometry is computed, never measured, so no second wordmark needs to
+       exist anywhere in the scene just to be sized against.                  */
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const markSvg = rootRef.current.querySelector<SVGSVGElement>('.pl-mark-wrap svg');
-    const place = rootRef.current.querySelector<SVGGElement>('.pl-portal-place');
-    const cut = rootRef.current.querySelector<SVGPathElement>('.pl-portal-cut');
 
-    if (markSvg && place && cut) {
-      const r = markSvg.getBoundingClientRect();
-      const s = r.width / SHAHD_WIDTH;
-      // the wordmark viewBox starts at y=-4, so the glyph box starts 4 units in
-      const tx = r.left;
-      const ty = r.top + 4 * s;
-
-      place.setAttribute('transform', `translate(${tx}, ${ty + LOGO_HEIGHT * s}) scale(${s})`);
-
-      // viewport rectangle expressed in glyph units, generously oversized
-      const x0 = (0 - tx) / s - vw / s;
-      const x1 = (vw - tx) / s + vw / s;
-      const y0 = (0 - ty - LOGO_HEIGHT * s) / s - vh / s;
-      const y1 = (vh - ty - LOGO_HEIGHT * s) / s + vh / s;
-
-      const panel = `M${x0},${y0} L${x1},${y0} L${x1},${y1} L${x0},${y1} Z`;
-      cut.setAttribute('d', `${panel} ${SHAHD_LETTERS.map((l) => l.d).join(' ')}`);
+    let markW = Math.min(vw * 0.86, 1150);
+    let s = markW / SHAHD_WIDTH;
+    const maxH = vh * 0.4;
+    if (LOGO_HEIGHT * s > maxH) {
+      s = maxH / LOGO_HEIGHT;
+      markW = SHAHD_WIDTH * s;
     }
+    const tx = (vw - markW) / 2;
+    const ty = (vh - LOGO_HEIGHT * s) / 2;
+    const placement = `translate(${tx}, ${ty + LOGO_HEIGHT * s}) scale(${s})`;
 
-    // The terms dissolve directly into the transparent SHAHD. The solid
-    // wordmark remains invisible and exists only to provide exact geometry.
-    tl.set('.pl-scrim', { opacity: 0.72 }, 2.85)
-      .to('.pl-portal', { opacity: 1, duration: 0.95, ease: 'sine.inOut' }, 2.85)
-      .to('.pl-col, .pl-glow', { opacity: 0, duration: 0.95, ease: 'sine.inOut' }, 2.85)
-      // Normal-speed breathing hold: let the transparent name read clearly.
-      .to('.pl-portal-zoom', {
-        scale: 1.07,
+    // pin the mask + panel to exact pixel dimensions (no percentage ambiguity)
+    root.querySelectorAll<SVGElement>('.pl-sized').forEach((el) => {
+      el.setAttribute('x', '0');
+      el.setAttribute('y', '0');
+      el.setAttribute('width', String(vw));
+      el.setAttribute('height', String(vh));
+    });
+    // the mask copy and the visible outline copy share one placement
+    root.querySelectorAll<SVGGElement>('.pl-place').forEach((el) => {
+      el.setAttribute('transform', placement);
+    });
+
+    const scrim = root.querySelector<HTMLDivElement>('.pl-scrim');
+    const outline = root.querySelector<SVGGElement>('.pl-outline');
+    const zooms = gsap.utils.toArray<SVGGElement>('.pl-zoom');
+
+    const tl = gsap.timeline({ onComplete: () => setVisible(false) });
+
+    /* ═══════ THE SET IS BUILT — and immediately starts giving birth ═══════ */
+    tl.fromTo('.pl-grid-line',
+      { scaleY: 0, transformOrigin: '50% 0%' },
+      { scaleY: 1, duration: 0.6, stagger: 0.02, ease: 'power2.inOut' }, 0)
+      .fromTo('.pl-cross',
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.55, stagger: 0.07, ease: 'power3.out' }, 0.25)
+      .fromTo('.pl-label',
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.06, ease: 'power2.out' }, 0.3);
+
+    /* ═══════ THE BANDS RISE UP THROUGH THE GRID ═══════
+       They grow out of the rhythm the grid just drew, so the second beat is
+       carried by the first instead of replacing it.                          */
+    BANDS.forEach((b, i) => {
+      const at = 0.55 + i * 0.1;
+      tl.fromTo(`.pl-band--${i}`,
+        { opacity: 0, yPercent: 22, scaleY: 0.6, filter: 'blur(18px)', transformOrigin: '50% 100%' },
+        { opacity: 1, yPercent: 0, scaleY: 1, filter: 'blur(0px)', duration: 1.25, ease: 'power3.out' }, at)
+        .fromTo(`.pl-band--${i} .pl-band__inner`,
+          { xPercent: b.dir * 52 },
+          { xPercent: b.dir * -6, duration: 1.5, ease: 'power3.out' }, at);
+    });
+    // the marquee never stops breathing while it is on screen
+    tl.to('.pl-band__inner', { xPercent: (i) => BANDS[i].dir * -13, duration: 1.4, ease: 'none' }, 1.85);
+
+    /* ═══════ COUNTER — runs underneath the whole first movement ═══════ */
+    tl.fromTo('.pl-ghost', { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'sine.out' }, 0.8)
+      .to(progress, { v: 100, duration: 3.4, ease: 'power2.inOut', onUpdate: setCount }, 0.8);
+
+    /* ═══════ EVERYTHING GATHERS — AND THE GATHERING IS THE WORD ═══════
+       The bands swell and blur away, the grid pulls inward, the counter lifts
+       off, and in exactly the same window the letterforms settle and the hero
+       fades up inside them. The panel underneath never changes, so the word
+       arrives without anything being layered on top of anything.             */
+    tl.to('.pl-band', {
+      y: (i) => (2 - i) * -5 + 'vh',
+      scaleY: 1.32,
+      scaleX: 1.05,
+      filter: 'blur(30px)',
+      opacity: 0,
+      duration: 1.35,
+      ease: 'power2.inOut',
+      stagger: { each: 0.05, from: 'edges' },
+    }, 2.45)
+      .to('.pl-grid-line', {
+        x: (i) => (5.5 - i) * 14,
+        opacity: 0,
+        duration: 1.25,
+        ease: 'power2.inOut',
+      }, 2.45)
+      .to('.pl-bloom', { opacity: 0.46, duration: 0.8, ease: 'sine.inOut' }, 2.5)
+      .to('.pl-bloom', { opacity: 0, duration: 1.05, ease: 'sine.inOut' }, 3.3)
+      // the counter lifts away as the word takes its place
+      .to('.pl-ghost', { scale: 1.09, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 2.8)
+      // the letterforms settle…
+      .fromTo('.pl-breathe',
+        { scale: 1.14, svgOrigin: `${vw / 2} ${vh / 2}` },
+        { scale: 1, svgOrigin: `${vw / 2} ${vh / 2}`, duration: 1.7, ease: 'power3.out' }, 2.7)
+      // …and the hero develops up inside them (scrim starts as pure canvas)
+      .to(scrim, { opacity: 0.72, duration: 1.5, ease: 'power2.out' }, 2.7)
+      .fromTo(outline,
+        { opacity: 0 },
+        { opacity: 0.4, duration: 1.2, ease: 'power2.out' }, 2.7)
+      // it keeps living while it holds
+      .to('.pl-breathe', {
+        scale: 1.028,
         svgOrigin: `${vw / 2} ${vh / 2}`,
-        duration: 1.45,
+        duration: 1.5,
         ease: 'sine.inOut',
-      }, 3.8)
-      .to('.pl-label, .pl-cross', { opacity: 0, duration: 0.65, ease: 'power2.inOut' }, 4.55)
-      // Then accelerate hard: short, fast and cinematic.
-      .to('.pl-portal-outline', { opacity: 0, duration: 0.25, ease: 'power2.in' }, 5.0)
-      .to('.pl-scrim', { opacity: 0, duration: 0.65, ease: 'power2.out' }, 5.18)
-      .to('.pl-portal-zoom', {
-        scale: 34,
-        svgOrigin: `${vw / 2} ${vh / 2}`,
-        duration: 0.82,
-        ease: 'expo.in',
-      }, 5.25);
+      }, 4.4)
+      // the frame furniture clears, leaving only the word
+      .to('.pl-label, .pl-cross', { opacity: 0, duration: 0.85, ease: 'power2.inOut' }, 4.2);
+
+    /* ═══════ THE RELEASE — ONE master motion ═══════
+       A single tween drives the opening, the outline and the scrim together on
+       a curve that is almost still while the name reads, then accelerates
+       hard. The hold and the rush are the same gesture, not two moves.       */
+    const release = { v: 0 };
+    tl.to(release, {
+      v: 1,
+      duration: 2.4,
+      ease: 'power4.in',
+      onUpdate: () => {
+        const v = release.v;
+        const scale = 1 + v * 33;
+        zooms.forEach((el) => {
+          gsap.set(el, { scale, svgOrigin: `${vw / 2} ${vh / 2}` });
+        });
+        if (outline) gsap.set(outline, { opacity: 0.4 * Math.max(0, 1 - v * 5.5) });
+        if (scrim) gsap.set(scrim, { opacity: 0.72 * Math.max(0, 1 - v * 3.4) });
+      },
+    }, 4.55);
 
   }, { scope: rootRef });
 
@@ -165,29 +201,83 @@ export default function Preloader() {
       className="preloader"
       style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden' }}
     >
-      {/* Canvas columns */}
-      {COLUMNS.map((i) => (
-        <div
-          key={i}
-          className="pl-col"
-          style={{
-            position: 'absolute',
-            top: '-1px',
-            bottom: '-1px',
-            left: `${i * 20}%`,
-            width: '20.5%',
-            backgroundColor: CANVAS,
-          }}
-        />
-      ))}
+      {/* ── Scrim: sits under the panel, so it only ever tints what the
+             letter-windows reveal. Starts as pure canvas colour. ── */}
+      <div
+        className="pl-scrim"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: CANVAS,
+          opacity: 1,
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+      />
 
-      {/* Hero-derived ambient light, so the loader shares the hero's air */}
+      {/* ── THE PANEL: the canvas for the entire scene, with the one SHAHD cut
+             out of it. Always fully opaque — never fades, never swaps. ── */}
+      <svg
+        className="pl-portal"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }}
+        aria-hidden
+      >
+        <defs>
+          <mask id="pl-window" maskUnits="userSpaceOnUse">
+            <rect className="pl-sized" fill="#ffffff" />
+            <g className="pl-zoom">
+              <g className="pl-breathe">
+                <g className="pl-place">
+                  {SHAHD_LETTERS.map((l, i) => (
+                    <path key={i} d={l.d} fill="#000000" />
+                  ))}
+                </g>
+              </g>
+            </g>
+          </mask>
+        </defs>
+        <rect className="pl-sized" fill={CANVAS} mask="url(#pl-window)" />
+      </svg>
+
+      {/* ── The word's own hairline, kept in perfect sync with the window ── */}
+      <svg
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 2,
+          pointerEvents: 'none',
+        }}
+        aria-hidden
+      >
+        <g className="pl-zoom">
+          <g className="pl-breathe">
+            <g className="pl-place">
+              <g className="pl-outline" fill="none" stroke={INK} strokeWidth="0.72" opacity="0">
+                {SHAHD_LETTERS.map((l, i) => (
+                  <path key={i} d={l.d} />
+                ))}
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+
+      {/* ── Hero-derived ambient light, so the loader shares the hero's air ── */}
       <div
         className="pl-glow"
         style={{
           position: 'absolute',
           inset: 0,
-          zIndex: 1,
+          zIndex: 3,
           pointerEvents: 'none',
           background: `
             radial-gradient(ellipse 60% 55% at 50% -15%, hsla(265, 100%, 78%, 0.22) 0%, hsla(265, 100%, 78%, 0.09) 45%, rgba(12,12,12,0) 100%),
@@ -197,7 +287,7 @@ export default function Preloader() {
       />
 
       {/* ── Registration frame ── */}
-      <div className="pl-frame" style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none' }}>
+      <div className="pl-frame" style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none' }}>
         {GRID.map((i) => (
           <div
             key={i}
@@ -226,14 +316,6 @@ export default function Preloader() {
         ))}
       </div>
 
-      {/* ── Corner labels ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none', fontFamily: MONO, fontSize: '1.05rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(244, 241, 234, 0.42)' }}>
-        <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', left: '5.2rem' }}>Shahd Khairy</div>
-        <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', right: '5.2rem' }}>Portfolio / 2026</div>
-        <div className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', left: '5.2rem' }}>Cairo — EG</div>
-        <div ref={pctRef} className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', right: '5.2rem', color: 'rgba(244,241,234,0.7)', fontVariantNumeric: 'tabular-nums' }}>000%</div>
-      </div>
-
       {/* ── Ghost counter ── */}
       <div
         ref={ghostRef}
@@ -250,7 +332,7 @@ export default function Preloader() {
           color: 'transparent',
           WebkitTextStroke: '1px rgba(244, 241, 234, 0.08)',
           lineHeight: 1,
-          zIndex: 1,
+          zIndex: 4,
           pointerEvents: 'none',
           fontVariantNumeric: 'tabular-nums',
           opacity: 0,
@@ -260,7 +342,7 @@ export default function Preloader() {
       </div>
 
       {/* ── Kinetic marquee bands ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 5, pointerEvents: 'none' }}>
         {BANDS.map((b, i) => (
           <div
             key={i}
@@ -305,7 +387,7 @@ export default function Preloader() {
         style={{
           position: 'absolute',
           inset: 0,
-          zIndex: 5,
+          zIndex: 6,
           pointerEvents: 'none',
           opacity: 0,
           background:
@@ -313,70 +395,13 @@ export default function Preloader() {
         }}
       />
 
-      {/* ── The name — big ── */}
-      <div
-        className="pl-mark"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 6,
-          pointerEvents: 'none',
-        }}
-      >
-        <div className="pl-mark-wrap" style={{ width: 'min(78rem, 86vw)', opacity: 0 }}>
-          <Wordmark drawable />
-        </div>
+      {/* ── Corner labels ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 7, pointerEvents: 'none', fontFamily: MONO, fontSize: '1.05rem', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(244, 241, 234, 0.42)' }}>
+        <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', left: '5.2rem' }}>Shahd Khairy</div>
+        <div className="pl-label" style={{ position: 'absolute', top: '2.2rem', right: '5.2rem' }}>Portfolio / 2026</div>
+        <div className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', left: '5.2rem' }}>Cairo — EG</div>
+        <div ref={pctRef} className="pl-label" style={{ position: 'absolute', bottom: '2.2rem', right: '5.2rem', color: 'rgba(244,241,234,0.7)', fontVariantNumeric: 'tabular-nums' }}>000%</div>
       </div>
-
-      {/* ── Scrim: below the cut-out, so it only tints what the holes reveal ── */}
-      <div
-        className="pl-scrim"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: CANVAS,
-          opacity: 0,
-          zIndex: 7,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* ── The portal: the cover with SHAHD cut clean out of it ── */}
-      <svg
-        className="pl-portal"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 8,
-          opacity: 0,
-          pointerEvents: 'none',
-        }}
-        aria-hidden
-      >
-        <g className="pl-portal-zoom">
-          <g className="pl-portal-place">
-            {/* d is built at runtime: viewport rect minus the letterforms */}
-            <path className="pl-portal-cut" fillRule="evenodd" fill={CANVAS} />
-            <g
-              className="pl-portal-outline"
-              fill="none"
-              stroke={INK}
-              strokeWidth="0.72"
-              opacity="0.52"
-            >
-              {SHAHD_LETTERS.map((l, i) => (
-                <path key={i} d={l.d} />
-              ))}
-            </g>
-          </g>
-        </g>
-      </svg>
-
     </div>
   );
 }
