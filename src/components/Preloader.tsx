@@ -84,13 +84,6 @@ export default function Preloader() {
       .to('.pl-bloom', { opacity: 0.5, duration: 0.75, ease: 'sine.inOut' }, 2.75)
       .to('.pl-bloom', { opacity: 0, duration: 0.9, ease: 'sine.inOut' }, 3.5);
 
-    /* ═══════ PHASE 4 — THE NAME SWELLS UP ═══════ */
-    tl.fromTo('.pl-mark-wrap',
-      { scale: 0.82, opacity: 0, filter: 'blur(26px)' },
-      { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1.5, ease: 'power3.out' }, 3.1)
-      // it keeps breathing — never sits still
-      .to('.pl-mark-wrap', { scale: 1.045, duration: 1.5, ease: 'sine.inOut' }, 4.4);
-
     /* ═══════ COUNTER ═══════ */
     tl.fromTo('.pl-ghost', { opacity: 0 }, { opacity: 1, duration: 0.7 }, 0.8)
       .to(progress, { v: 100, duration: 3.6, ease: 'power2.inOut', onUpdate: setCount }, 0.8)
@@ -129,25 +122,28 @@ export default function Preloader() {
       cut.setAttribute('d', `${panel} ${SHAHD_LETTERS.map((l) => l.d).join(' ')}`);
     }
 
-    // Hand off without a single hard edge. The cut-out panel is already in
-    // place (identical to the canvas, so nothing visibly changes), then the
-    // ivory dissolves away *inside its own silhouette* — the letterforms fill
-    // with the hero instead of the loader — and the window swells open.
-    tl.to('.pl-label, .pl-cross', { opacity: 0, duration: 0.7, ease: 'power2.inOut' }, 4.8)
-      .set('.pl-portal', { opacity: 1 }, 5.2)
-      .set('.pl-col', { opacity: 0 }, 5.2)
-      .set('.pl-glow', { opacity: 0 }, 5.2)
-      // the hero starts dimmed inside the letters, then develops up
-      .set('.pl-scrim', { opacity: 0.66 }, 5.2)
-      .to('.pl-mark-wrap', { opacity: 0, duration: 0.55, ease: 'sine.inOut' }, 5.35)
-      .to('.pl-scrim', { opacity: 0, duration: 1.35, ease: 'power1.out' }, 5.7)
-      // the window swells open into the hero
+    // The terms dissolve directly into the transparent SHAHD. The solid
+    // wordmark remains invisible and exists only to provide exact geometry.
+    tl.set('.pl-scrim', { opacity: 0.72 }, 2.85)
+      .to('.pl-portal', { opacity: 1, duration: 0.95, ease: 'sine.inOut' }, 2.85)
+      .to('.pl-col, .pl-glow', { opacity: 0, duration: 0.95, ease: 'sine.inOut' }, 2.85)
+      // Normal-speed breathing hold: let the transparent name read clearly.
+      .to('.pl-portal-zoom', {
+        scale: 1.07,
+        svgOrigin: `${vw / 2} ${vh / 2}`,
+        duration: 1.45,
+        ease: 'sine.inOut',
+      }, 3.8)
+      .to('.pl-label, .pl-cross', { opacity: 0, duration: 0.65, ease: 'power2.inOut' }, 4.55)
+      // Then accelerate hard: short, fast and cinematic.
+      .to('.pl-portal-outline', { opacity: 0, duration: 0.25, ease: 'power2.in' }, 5.0)
+      .to('.pl-scrim', { opacity: 0, duration: 0.65, ease: 'power2.out' }, 5.18)
       .to('.pl-portal-zoom', {
         scale: 34,
         svgOrigin: `${vw / 2} ${vh / 2}`,
-        duration: 1.9,
-        ease: 'power2.in',
-      }, 5.7);
+        duration: 0.82,
+        ease: 'expo.in',
+      }, 5.25);
 
   }, { scope: rootRef });
 
@@ -366,6 +362,17 @@ export default function Preloader() {
           <g className="pl-portal-place">
             {/* d is built at runtime: viewport rect minus the letterforms */}
             <path className="pl-portal-cut" fillRule="evenodd" fill={CANVAS} />
+            <g
+              className="pl-portal-outline"
+              fill="none"
+              stroke={INK}
+              strokeWidth="0.72"
+              opacity="0.52"
+            >
+              {SHAHD_LETTERS.map((l, i) => (
+                <path key={i} d={l.d} />
+              ))}
+            </g>
           </g>
         </g>
       </svg>

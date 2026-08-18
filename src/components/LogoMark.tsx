@@ -12,8 +12,6 @@
 import {
   SHAHD_LETTERS,
   SHAHD_WIDTH,
-  KHAIRY_LETTERS,
-  KHAIRY_WIDTH,
   LOGO_HEIGHT,
 } from './logo-paths';
 
@@ -50,26 +48,7 @@ export function Wordmark({
   );
 }
 
-/** KHAIRY */
-export function WordmarkSecond({ color = INK }: { color?: string }) {
-  return (
-    <svg
-      viewBox={`0 -4 ${KHAIRY_WIDTH} ${LOGO_HEIGHT + 8}`}
-      width="100%"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ display: 'block', overflow: 'visible' }}
-      aria-label="KHAIRY"
-      role="img"
-    >
-      {KHAIRY_LETTERS.map((l, i) => (
-        <path key={i} d={l.d} transform={`translate(0, ${LOGO_HEIGHT})`} fill={color} />
-      ))}
-    </svg>
-  );
-}
-
-/** Header / menu lockup — two justified vector lines, SHAHD over KHAIRY */
+/** Header / menu lockup — bold SHAHD over a light, tracked KHAIRY */
 export default function LogoMark() {
   return (
     <span
@@ -77,12 +56,26 @@ export default function LogoMark() {
         display: 'inline-flex',
         flexDirection: 'column',
         alignItems: 'stretch',
-        gap: '0.18rem',
+        gap: '0.28rem',
         width: '10rem',
       }}
     >
       <Wordmark />
-      <WordmarkSecond />
+      <span
+        style={{
+          fontFamily: "'Inter Tight', sans-serif",
+          fontSize: '1.05rem',
+          fontWeight: 400,
+          lineHeight: 1,
+          letterSpacing: '0.62em',
+          paddingLeft: '0.22em',
+          color: INK,
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        KHAIRY
+      </span>
     </span>
   );
 }
