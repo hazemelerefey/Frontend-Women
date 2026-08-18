@@ -3,13 +3,22 @@
 import { useState, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { SKMonogram, INK, SIGNAL } from './LogoMark';
+import { INK, SIGNAL, SERIF } from './LogoMark';
 
 gsap.registerPlugin(useGSAP);
 
 const MONO = "'IBM Plex Mono', monospace";
 const WORDS = ['DESIGN', 'CODE', 'SHIP'];
 const COLUMNS = [0, 1, 2, 3, 4];
+
+/** The wordmark, split into initials (S, K) and the letters hidden inside them */
+const NAME: { ch: string; initial?: boolean; space?: boolean }[] = [
+  { ch: 'S', initial: true },
+  { ch: 'H' }, { ch: 'A' }, { ch: 'H' }, { ch: 'D' },
+  { ch: ' ', space: true },
+  { ch: 'K', initial: true },
+  { ch: 'H' }, { ch: 'A' }, { ch: 'I' }, { ch: 'R' }, { ch: 'Y' },
+];
 
 export default function Preloader() {
   const [visible, setVisible] = useState(true);
@@ -25,6 +34,12 @@ export default function Preloader() {
     };
     setGhost();
 
+    /* Measure the natural width of every non-initial letter, then collapse
+       them so the line reads as a pure "SK" monogram. */
+    const rest = gsap.utils.toArray<HTMLElement>('.morph-rest');
+    const widths = rest.map((el) => el.offsetWidth);
+    rest.forEach((el) => gsap.set(el, { width: 0, opacity: 0 }));
+
     const tl = gsap.timeline({ onComplete: () => setVisible(false) });
 
     /* ============ ACT 1 — KINETIC WORD MONTAGE (hard slam cuts) ============ */
@@ -36,29 +51,41 @@ export default function Preloader() {
         .to(`.title__word--${i}`,
           { opacity: 0, duration: 0.08, ease: 'none' }, t + 0.34);
     });
-    // tiny caption ticks along with the montage
     tl.fromTo('.title__caption',
       { opacity: 0 },
       { opacity: 1, duration: 0.3, ease: 'none' }, 0.25);
 
-    /* ============ ACT 2 — MARK ASSEMBLY (bands slide + lime flicker) ============ */
-    tl.fromTo('.logo-band--top', { xPercent: -120, opacity: 0 }, { xPercent: 0, opacity: 1, duration: 0.55, ease: 'expo.out' }, 1.7)
-      .fromTo('.logo-band--bot', { xPercent: 120, opacity: 0 }, { xPercent: 0, opacity: 1, duration: 0.55, ease: 'expo.out' }, 1.82)
-      .fromTo('.logo-band--mid', { xPercent: -200, opacity: 0 }, { xPercent: 0, opacity: 1, duration: 0.4, ease: 'expo.out' }, 2.0)
-      // two-frame signal flicker on the lime band
-      .set('.logo-band--mid', { opacity: 0 }, 2.46)
-      .set('.logo-band--mid', { opacity: 1 }, 2.52)
-      .set('.logo-band--mid', { opacity: 0 }, 2.58)
-      .set('.logo-band--mid', { opacity: 1 }, 2.64);
+    /* ============ ACT 2 — SK MONOGRAM (initials slam in, oversized) ============ */
+    tl.set('.morph', { scale: 1.9 }, 0)
+      .fromTo('.morph-initial--s',
+        { opacity: 0, y: 60, filter: 'blur(10px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'expo.out' }, 1.7)
+      .fromTo('.morph-initial--k',
+        { opacity: 0, y: -60, filter: 'blur(10px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'expo.out' }, 1.82);
 
-    /* ============ ACT 3 — NAME (letters flip in) + baseline rule ============ */
-    tl.fromTo('.title__name .title-letter',
-      { rotateX: -92, opacity: 0, transformOrigin: '50% 100%' },
-      { rotateX: 0, opacity: 1, duration: 0.55, stagger: 0.035, ease: 'expo.out' }, 2.3)
-      .fromTo('.title__rule', { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: 'expo.inOut' }, 2.7)
+    /* ============ ACT 3 — THE MORPH (SK unfolds into SHAHD KHAIRY) ============ */
+    rest.forEach((el, i) => {
+      tl.to(el, {
+        width: widths[i],
+        opacity: 1,
+        duration: 0.45,
+        ease: 'expo.out',
+      }, 2.45 + i * 0.05);
+    });
+    // the monogram scales down to wordmark size as the name unfolds
+    tl.to('.morph', { scale: 1, duration: 0.95, ease: 'expo.inOut' }, 2.45)
+      // signal flick on the initials as the transformation locks
+      .to('.morph-initial', { color: SIGNAL, duration: 0.06 }, 3.32)
+      .to('.morph-initial', { color: INK, duration: 0.18 }, 3.44)
+      // lime diamond accent seals the wordmark
+      .fromTo('.morph-accent',
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2.5)' }, 3.4)
+      .fromTo('.title__rule', { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: 'expo.inOut' }, 3.2)
       .fromTo('.title__role span',
         { opacity: 0 },
-        { opacity: 1, duration: 0.04, stagger: 0.03, ease: 'none' }, 2.9);
+        { opacity: 1, duration: 0.04, stagger: 0.03, ease: 'none' }, 3.4);
 
     /* ============ GHOST COUNTER (giant outline number behind) ============ */
     tl.fromTo('.title__ghost', { opacity: 0 }, { opacity: 1, duration: 0.5 }, 1.5)
@@ -66,13 +93,13 @@ export default function Preloader() {
 
     /* ============ ACT 4 — LOUVER EXIT (five columns drop away) ============ */
     tl.to('.title__content, .title__ghost, .title__caption',
-      { opacity: 0, y: -24, duration: 0.35, ease: 'expo.in', stagger: 0.05 }, 4.25)
+      { opacity: 0, y: -24, duration: 0.35, ease: 'expo.in', stagger: 0.05 }, 4.35)
       .to('.title__col', {
         yPercent: 100,
         duration: 0.65,
         ease: 'expo.inOut',
         stagger: { each: 0.07, from: 'start' },
-      }, 4.6);
+      }, 4.7);
 
   }, { scope: rootRef });
 
@@ -182,35 +209,64 @@ export default function Preloader() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '3.4rem',
+          gap: '3.6rem',
           zIndex: 2,
-          perspective: '900px',
         }}
       >
-        {/* Sliced SK mark */}
-        <div style={{ width: '16rem' }}>
-          <SKMonogram size="100%" drawable />
-        </div>
-
-        {/* Name — letters flip in on X axis */}
+        {/* SK → SHAHD KHAIRY morphing wordmark */}
         <h1
-          className="title__name"
+          className="morph"
           style={{
             margin: 0,
             display: 'flex',
-            fontSize: 'clamp(3.4rem, 6.5vw, 7.6rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
+            alignItems: 'baseline',
+            fontFamily: SERIF,
+            fontSize: 'clamp(3.6rem, 6.5vw, 8rem)',
+            fontWeight: 600,
+            letterSpacing: '0.1em',
             lineHeight: 1,
             textTransform: 'uppercase',
             color: INK,
-            whiteSpace: 'pre',
-            perspective: '900px',
           }}
         >
-          {'SHAHD KHAIRY'.split('').map((c, i) => (
-            <span key={i} className="title-letter" style={{ display: 'inline-block', opacity: 0, whiteSpace: 'pre' }}>{c}</span>
-          ))}
+          {NAME.map((l, i) =>
+            l.initial ? (
+              <span
+                key={i}
+                className={`morph-initial morph-initial--${l.ch.toLowerCase()}`}
+                style={{ display: 'inline-block', opacity: 0 }}
+              >
+                {l.ch}
+              </span>
+            ) : (
+              <span
+                key={i}
+                className="morph-rest"
+                style={{
+                  display: 'inline-block',
+                  overflow: 'hidden',
+                  whiteSpace: 'pre',
+                }}
+              >
+                {l.space ? '\u00A0' : l.ch}
+              </span>
+            )
+          )}
+          {/* lime diamond accent */}
+          <span
+            className="morph-accent"
+            aria-hidden
+            style={{
+              display: 'inline-block',
+              width: '0.22em',
+              height: '0.22em',
+              marginLeft: '0.35em',
+              backgroundColor: SIGNAL,
+              transform: 'rotate(45deg)',
+              opacity: 0,
+              alignSelf: 'center',
+            }}
+          />
         </h1>
 
         {/* Baseline rule */}
