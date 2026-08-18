@@ -101,7 +101,7 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Centered Woman Cutout Model */}
+      {/* Centered Woman Cutout Model — layered IN FRONT of the title */}
       <div 
         className="main-screen__image" 
         style={{
@@ -111,7 +111,7 @@ export default function HeroSection() {
           transform: 'translateX(-50%)',
           height: '86vh',
           width: 'auto',
-          zIndex: 2,
+          zIndex: 4,
           pointerEvents: 'none'
         }}
       >
@@ -138,13 +138,13 @@ export default function HeroSection() {
           width: '100%',
         }}
       >
-        {/* Main Title Group (FRONTEND + Subnav + WOMAN) */}
-        <div style={{ marginTop: '4vh', textAlign: 'center' }}>
+        {/* Main Title Group (FRONTEND + Subnav + WOMAN) — full-bleed backdrop */}
+        <div style={{ marginTop: '4vh', width: '100%' }}>
           {/* Line 1: FRONTEND */}
           <h1 
             className="main-screen__title-line-1" 
             style={{
-              fontSize: 'clamp(5rem, 17.5vw, 24rem)',
+              fontSize: 'clamp(5rem, 18.5vw, 26rem)',
               lineHeight: 0.78,
               letterSpacing: '-0.03em',
               color: 'var(--white)',
@@ -152,9 +152,14 @@ export default function HeroSection() {
               fontWeight: 800,
               textTransform: 'uppercase',
               margin: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
             }}
           >
-            FRONTEND
+            {'FRONTEND'.split('').map((c, i) => (
+              <span key={i} style={{ display: 'inline-block' }}>{c}</span>
+            ))}
           </h1>
 
           {/* Inline Navigation Bar between FRONTEND and WOMAN */}
@@ -217,7 +222,7 @@ export default function HeroSection() {
           <h1 
             className="main-screen__title-line-2" 
             style={{
-              fontSize: 'clamp(5rem, 17.5vw, 24rem)',
+              fontSize: 'clamp(5rem, 18.5vw, 26rem)',
               lineHeight: 0.78,
               letterSpacing: '-0.03em',
               color: 'var(--white)',
@@ -225,9 +230,14 @@ export default function HeroSection() {
               fontWeight: 800,
               textTransform: 'uppercase',
               margin: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
             }}
           >
-            WOMAN
+            {'WOMAN'.split('').map((c, i) => (
+              <span key={i} style={{ display: 'inline-block' }}>{c}</span>
+            ))}
           </h1>
         </div>
 
