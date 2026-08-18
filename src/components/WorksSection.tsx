@@ -250,7 +250,7 @@ export default function WorksSection() {
       <div className="works__marquee center-wrap" style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--black)', padding: '5rem 0', overflow: 'hidden' }}>
         <div className="works__marquee-inner">
           <FeaturesBar 
-            title="©2025" 
+            title="©2026" 
             items={['THINK', 'DIFFERENT', 'STAY HUNGRY']} 
             reverse={true}
           />

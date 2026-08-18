@@ -60,8 +60,8 @@ export default function LinksBar() {
             <a
               className="links-bar__item"
               href={link.href}
-              target="_blank"
-              rel="noreferrer"
+              target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+              rel={link.href.startsWith('mailto:') ? undefined : 'noreferrer'}
               onMouseEnter={() => setHoveredIdx(idx)}
               onMouseLeave={() => setHoveredIdx(null)}
               style={{

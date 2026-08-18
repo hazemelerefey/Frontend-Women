@@ -279,6 +279,7 @@ export default function CompareSection() {
                 height: '25rem',
                 color: 'var(--gray)',
                 boxShadow: '0 0.5rem 2rem rgba(0, 0, 0, 0.2)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
                 fontSize: '2.5rem',
               }}
             >

@@ -242,6 +242,34 @@ html {
   border-width: 0;
 }
 
+/* ============ Detail polish ============ */
+
+::selection {
+  background: var(--pink);
+  color: var(--black);
+}
+
+:focus-visible {
+  outline: 2px solid var(--sky);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Thin premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--black);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 195, 217, 0.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(180, 195, 217, 0.45);
+}
+
 /* ============ Motion utilities ============ */
 
 @keyframes marquee-loop {

@@ -327,7 +327,7 @@ export default function AboutSection() {
                         style={{
                           padding: '1rem 2rem',
                           borderRadius: '10rem',
-                          border: '1px solid rgba(180, 195, 217, 0.35)',
+                          border: '1px solid rgba(180, 195, 217, 0.5)',
                           fontSize: '1.3rem',
                           fontWeight: 700,
                           letterSpacing: '0.06em',

@@ -117,7 +117,7 @@ export default function HeroSection() {
       >
         <Image 
           src="/images/woman2.webp" 
-          alt="Frontend Woman" 
+          alt="Shahd Khairy — Full Stack Developer" 
           width={800} 
           height={1200}
           style={{ height: '100%', width: 'auto', objectFit: 'contain' }}

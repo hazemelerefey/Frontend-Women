@@ -302,7 +302,7 @@ export default function CalcSection() {
                   ${calculatedSavings.toLocaleString()}
                 </span>
                 <span style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--gray)', textTransform: 'uppercase' }}>
-                  ANNUALY
+                  ANNUALLY
                 </span>
               </div>
             </div>

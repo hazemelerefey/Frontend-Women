@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import LogoMark from './LogoMark';
 import { CloseIcon, WhatsAppIcon, LinkedInIcon } from './icons';
 
 const navLinks = [
@@ -44,14 +44,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           flexShrink: 0,
         }}
       >
-        <a href="#home" onClick={onClose}>
-          <Image
-            src="/images/mobile_logo.svg"
-            alt="logo"
-            width={48}
-            height={48}
-            style={{ filter: 'invert(0)' }}
-          />
+        <a href="#home" onClick={onClose} style={{ textDecoration: 'none' }} aria-label="Shahd Khairy — home">
+          <LogoMark />
         </a>
         <button
           onClick={onClose}
