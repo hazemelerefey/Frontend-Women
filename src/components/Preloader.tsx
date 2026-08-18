@@ -7,369 +7,216 @@ import { SKMonogram } from './LogoMark';
 
 gsap.registerPlugin(useGSAP);
 
-/** Four-pointed brand star (same geometry as public/images/svg/star.svg) */
-function Star({ size, color, className, style }: { size: number | string; color: string; className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg
-      className={className}
-      style={style}
-      width={size}
-      height={size}
-      viewBox="0 0 974 974"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M487 0L516.266 420.607C517.651 440.51 533.49 456.349 553.393 457.734L974 487L553.393 516.266C533.49 517.651 517.651 533.49 516.266 553.393L487 974L457.734 553.393C456.349 533.49 440.51 517.651 420.607 516.266L0 487L420.607 457.734C440.51 456.349 456.349 440.51 457.734 420.607L487 0Z"
-        fill={color}
-      />
-    </svg>
-  );
-}
-
-const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-/** One rolling digit column (slot-machine strip) */
-function DigitColumn({ colRef, chars }: { colRef: (el: HTMLDivElement | null) => void; chars: string[] }) {
-  return (
-    <div style={{ overflow: 'hidden', height: '1em', display: 'inline-block' }}>
-      <div ref={colRef} style={{ display: 'flex', flexDirection: 'column', willChange: 'transform' }}>
-        {chars.map((c, i) => (
-          <span key={i} style={{ height: '1em', lineHeight: 1, display: 'block' }}>{c}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
+const MONO = "'IBM Plex Mono', monospace";
 
 export default function Preloader() {
   const [visible, setVisible] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
-  const hundredsRef = useRef<HTMLDivElement | null>(null);
-  const tensRef = useRef<HTMLDivElement | null>(null);
-  const onesRef = useRef<HTMLDivElement | null>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(() => {
     if (!rootRef.current) return;
 
     const progress = { v: 0 };
-
     const setCounter = () => {
-      const v = Math.round(progress.v);
-      const hundreds = Math.floor(v / 100);
-      const tens = Math.floor((v % 100) / 10);
-      const ones = v % 10;
-      if (hundredsRef.current) hundredsRef.current.style.transform = `translateY(${-hundreds}em)`;
-      if (tensRef.current) tensRef.current.style.transform = `translateY(${-tens}em)`;
-      if (onesRef.current) onesRef.current.style.transform = `translateY(${-ones}em)`;
+      if (counterRef.current) {
+        counterRef.current.textContent = String(Math.round(progress.v)).padStart(3, '0') + '%';
+      }
     };
+    setCounter();
 
-    const tl = gsap.timeline({
-      onComplete: () => setVisible(false),
-    });
+    const tl = gsap.timeline({ onComplete: () => setVisible(false) });
 
-    /* ============ ACT 0 — SIGNATURE (logo build) ============ */
-    // The SK monogram draws itself on stroke by stroke like a signature.
+    /* ============ PHASE 1 — RIG (structure cuts in) ============ */
+    tl.fromTo('.boot__hairline--v', { scaleY: 0 }, { scaleY: 1, duration: 0.7, ease: 'expo.inOut' }, 0.1)
+      .fromTo('.boot__hairline--h', { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: 'expo.inOut' }, 0.18)
+      .fromTo('.boot__bracket', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'expo.out', stagger: 0.06 }, 0.35)
+      .fromTo('.boot__hud', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', stagger: 0.08 }, 0.55);
+
+    /* ============ PHASE 2 — SIGNATURE (logo draws) ============ */
     const strokes = gsap.utils.toArray<SVGPathElement>('.logo-stroke');
     strokes.forEach((path) => {
       const len = path.getTotalLength();
       gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
     });
-    tl.to(strokes, {
-      strokeDashoffset: 0,
-      duration: 0.55,
-      stagger: 0.28,
-      ease: 'power2.inOut',
-    }, 0.2)
-      // spark pops at the K's joint
+    tl.to(strokes, { strokeDashoffset: 0, duration: 0.5, stagger: 0.22, ease: 'power3.inOut' }, 0.7)
       .fromTo('.logo-spark',
         { scale: 0, transformOrigin: 'center', opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.6, ease: 'elastic.out(1.2, 0.4)' }, 1.35)
-      // wordmark letters rise in under the mark
-      .fromTo('.forge__wordmark .forge-letter',
-        { yPercent: 120, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.45, stagger: 0.03, ease: 'power2.out' }, 1.1)
-      // hold, then hand off: monogram + wordmark lift away…
-      .to('.forge__logo', { y: -40, opacity: 0, scale: 0.92, duration: 0.5, ease: 'power2.in' }, 2.35);
+        { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(3)' }, 1.7)
+      // shine sweep across the mark — a single hard cut of light
+      .fromTo('.boot__shine', { xPercent: -160 }, { xPercent: 160, duration: 0.6, ease: 'power2.inOut' }, 1.85);
 
-    /* ============ ACT 1 — IGNITION ============ */
-    // …and the spark's energy becomes the forge star.
-    tl.fromTo('.forge__star',
-      { scale: 0, rotation: -90, opacity: 0 },
-      { scale: 1, rotation: 0, opacity: 1, duration: 0.9, ease: 'elastic.out(1, 0.55)' }, 2.6)
-      .fromTo('.forge__glow',
-        { scale: 0.2, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1, ease: 'power2.out' }, 2.6);
+    /* ============ PHASE 3 — NAME (panel wipe) ============ */
+    // solid panel wipes over, the name appears behind it, panel wipes off
+    tl.fromTo('.boot__wipe', { scaleX: 0, transformOrigin: 'left center' }, { scaleX: 1, duration: 0.45, ease: 'expo.inOut' }, 1.6)
+      .set('.boot__name', { opacity: 1 }, 2.05)
+      .set('.boot__wipe', { transformOrigin: 'right center' }, 2.05)
+      .to('.boot__wipe', { scaleX: 0, duration: 0.45, ease: 'expo.inOut' }, 2.08)
+      .fromTo('.boot__role',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.05, stagger: 0.035, ease: 'none' }, 2.35);
 
-    /* Star breathing + slow spin for the whole forge phase */
-    tl.to('.forge__star', { rotation: 150, duration: 2.6, ease: 'none' }, 3.35)
-      .to('.forge__star', { scale: 1.12, duration: 0.65, yoyo: true, repeat: 3, ease: 'sine.inOut' }, 3.35);
+    /* ============ PHASE 4 — LOAD (progress ticks) ============ */
+    tl.fromTo('.boot__progress', { scaleX: 0 }, { scaleX: 1, duration: 1.9, ease: 'expo.inOut' }, 1.2)
+      .to(progress, { v: 100, duration: 1.9, ease: 'expo.inOut', onUpdate: setCounter }, 1.2);
 
-    /* ============ ACT 2 — FORGE ============ */
-    // Star-shaped shockwave rings
-    tl.fromTo('.forge__wave',
-      { scale: 0.4, opacity: 0.7 },
-      { scale: 7, opacity: 0, rotation: 45, duration: 1.7, ease: 'power1.out', stagger: 0.55 }, 3.35);
-
-    // Orbiting particles: ring fades in and rotates
-    tl.fromTo('.forge__orbit',
-      { opacity: 0, rotation: 0 },
-      { opacity: 1, rotation: 240, duration: 2.6, ease: 'power1.inOut' }, 3.35)
-      .to('.forge__orbit', { opacity: 0, duration: 0.3 }, 5.55);
-
-    // Labels letter-stagger in
-    tl.fromTo('.forge__label .forge-letter',
-      { yPercent: 120, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.025, ease: 'power2.out' }, 3.45);
-
-    // Counter 0 -> 100 with rolling digit strips
-    tl.fromTo('.forge__counter', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 3.35);
-    tl.to(progress, { v: 100, duration: 2.1, ease: 'power2.inOut', onUpdate: setCounter }, 3.5);
-
-    // Progress hairline
-    tl.fromTo('.forge__bar', { scaleX: 0 }, { scaleX: 1, duration: 2.25, ease: 'power2.inOut' }, 3.45);
-
-    /* ============ ACT 3 — SUPERNOVA EXIT ============ */
-    tl.to('.forge__label .forge-letter',
-      { yPercent: -120, opacity: 0, duration: 0.35, stagger: 0.015, ease: 'power2.in' }, 5.65)
-      .to('.forge__counter', { y: -40, opacity: 0, duration: 0.35, ease: 'power2.in' }, 5.65)
-      .to('.forge__bar', { opacity: 0, duration: 0.25 }, 5.7)
-      .to('.forge__glow', { opacity: 0, duration: 0.4 }, 5.75)
-      // the star detonates
-      .to('.forge__star', { scale: 34, rotation: 225, duration: 0.75, ease: 'power4.in' }, 5.75)
-      .fromTo('.forge__flash', { opacity: 0 }, { opacity: 0.9, duration: 0.28, ease: 'power2.in' }, 6.07)
-      .to('.forge__flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, 6.35)
-      .to(rootRef.current, { opacity: 0, duration: 0.4, ease: 'power1.out' }, 6.3);
+    /* ============ PHASE 5 — CUT (curtain split exit) ============ */
+    tl.to('.boot__content > *', { y: -30, opacity: 0, duration: 0.35, stagger: 0.04, ease: 'expo.in' }, 3.5)
+      .to('.boot__hud, .boot__bracket, .boot__hairline--v, .boot__hairline--h, .boot__progress',
+        { opacity: 0, duration: 0.25, ease: 'power1.in' }, 3.65)
+      .to('.boot__panel--top', { yPercent: -100, duration: 0.75, ease: 'expo.inOut' }, 3.95)
+      .to('.boot__panel--bottom', { yPercent: 100, duration: 0.75, ease: 'expo.inOut' }, 3.95);
 
   }, { scope: rootRef });
 
   if (!visible) return null;
 
-  const label1 = 'SHAHD KHAIRY — FULL STACK';
-  const label2 = 'PORTFOLIO ©2026';
+  const hud: React.CSSProperties = {
+    position: 'absolute',
+    fontFamily: MONO,
+    fontSize: '1.2rem',
+    letterSpacing: '0.12em',
+    color: 'rgba(180, 195, 217, 0.75)',
+    textTransform: 'uppercase',
+    zIndex: 3,
+  };
+
+  const bracket = (pos: React.CSSProperties, borders: React.CSSProperties): React.CSSProperties => ({
+    position: 'absolute',
+    width: '2.4rem',
+    height: '2.4rem',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    borderStyle: 'solid',
+    borderWidth: 0,
+    zIndex: 3,
+    ...pos,
+    ...borders,
+  });
 
   return (
     <div
       ref={rootRef}
       className="preloader"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        backgroundColor: '#0a0a0c',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      style={{ position: 'fixed', inset: 0, zIndex: 9999, overflow: 'hidden' }}
     >
-      {/* Ambient gradient glow behind the star */}
+      {/* Curtain panels (the actual background) */}
+      <div className="boot__panel--top" style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '50.2%', backgroundColor: '#0a0a0c' }} />
+      <div className="boot__panel--bottom" style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', height: '50.2%', backgroundColor: '#0a0a0c' }} />
+
+      {/* Hairline crosshairs */}
+      <div className="boot__hairline--v" style={{ position: 'absolute', left: '50%', top: 0, width: '1px', height: '100%', backgroundColor: 'rgba(255,255,255,0.07)', zIndex: 2 }} />
+      <div className="boot__hairline--h" style={{ position: 'absolute', top: '50%', left: 0, height: '1px', width: '100%', backgroundColor: 'rgba(255,255,255,0.07)', zIndex: 2 }} />
+
+      {/* Corner brackets — viewfinder frame */}
+      <div className="boot__bracket" style={bracket({ top: '3rem', left: '3rem' }, { borderTopWidth: '1px', borderLeftWidth: '1px' })} />
+      <div className="boot__bracket" style={bracket({ top: '3rem', right: '3rem' }, { borderTopWidth: '1px', borderRightWidth: '1px' })} />
+      <div className="boot__bracket" style={bracket({ bottom: '3rem', left: '3rem' }, { borderBottomWidth: '1px', borderLeftWidth: '1px' })} />
+      <div className="boot__bracket" style={bracket({ bottom: '3rem', right: '3rem' }, { borderBottomWidth: '1px', borderRightWidth: '1px' })} />
+
+      {/* HUD labels — mono, technical */}
+      <div className="boot__hud" style={{ ...hud, top: '3.2rem', left: '6.5rem' }}>SHAHD KHAIRY — PORTFOLIO</div>
+      <div className="boot__hud" style={{ ...hud, top: '3.2rem', right: '6.5rem' }}>©2026</div>
+      <div className="boot__hud" style={{ ...hud, bottom: '3.2rem', left: '6.5rem' }}>CAIRO.EG / 30.0444°N</div>
+      <div className="boot__hud" style={{ ...hud, bottom: '3.2rem', right: '6.5rem', color: 'var(--white)' }}>
+        <span ref={counterRef} style={{ fontVariantNumeric: 'tabular-nums' }}>000%</span>
+      </div>
+
+      {/* Progress hairline — center horizontal, drawn over the crosshair */}
       <div
-        className="forge__glow"
+        className="boot__progress"
         style={{
           position: 'absolute',
-          width: '110rem',
-          height: '110rem',
-          borderRadius: '50%',
-          background: `radial-gradient(circle at 50% 50%,
-            hsla(265, 100%, 78%, 0.28) 0%,
-            hsla(240, 100%, 70%, 0.14) 30%,
-            hsla(210, 100%, 62%, 0.08) 55%,
-            transparent 75%)`,
-          pointerEvents: 'none',
+          top: '50%',
+          left: 0,
+          width: '100%',
+          height: '1px',
+          transformOrigin: 'left center',
+          transform: 'scaleX(0)',
+          background: 'linear-gradient(90deg, #94BDF7, #D2BDF8)',
+          zIndex: 2,
         }}
       />
 
-      {/* Grain */}
+      {/* Center content */}
       <div
+        className="boot__content"
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")`,
-          backgroundSize: '200px 200px',
-          opacity: 0.16,
-          mixBlendMode: 'overlay',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Star-shaped shockwave rings */}
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="forge__wave"
-          style={{
-            position: 'absolute',
-            opacity: 0,
-            pointerEvents: 'none',
-            filter: 'blur(1px)',
-          }}
-        >
-          <Star size="16rem" color="rgba(210, 189, 248, 0.35)" />
-        </div>
-      ))}
-
-      {/* Orbiting particles */}
-      <div
-        className="forge__orbit"
-        style={{
-          position: 'absolute',
-          width: '44rem',
-          height: '44rem',
-          opacity: 0,
-          pointerEvents: 'none',
-        }}
-      >
-        {[0, 60, 120, 180, 240, 300].map((deg, i) => (
-          <div
-            key={deg}
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              width: i % 2 ? '0.5rem' : '0.8rem',
-              height: i % 2 ? '0.5rem' : '0.8rem',
-              borderRadius: '50%',
-              backgroundColor: i % 3 ? 'var(--sky)' : 'var(--pink)',
-              transform: `rotate(${deg}deg) translateX(${i % 2 ? 19 : 22}rem)`,
-              boxShadow: '0 0 1.2rem currentColor',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* ACT 0 — the signature logo build */}
-      <div
-        className="forge__logo"
-        style={{
-          position: 'absolute',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '2.4rem',
-          zIndex: 2,
+          justifyContent: 'center',
+          gap: '3.2rem',
+          zIndex: 4,
         }}
       >
-        <div style={{ width: '17rem' }}>
+        {/* Monogram with shine sweep */}
+        <div style={{ position: 'relative', width: '15rem', overflow: 'visible' }}>
           <SKMonogram size="100%" strokeWidth={4.5} drawable />
+          <div style={{ position: 'absolute', inset: '-1rem', overflow: 'hidden', pointerEvents: 'none' }}>
+            <div
+              className="boot__shine"
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '40%',
+                left: '30%',
+                background: 'linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%)',
+                transform: 'translateX(-160%) skewX(-18deg)',
+                mixBlendMode: 'screen',
+              }}
+            />
+          </div>
         </div>
+
+        {/* Name — revealed by a solid panel wipe */}
+        <div style={{ position: 'relative', padding: '0.4rem 1.2rem' }}>
+          <h1
+            className="boot__name"
+            style={{
+              margin: 0,
+              opacity: 0,
+              fontSize: 'clamp(3.2rem, 6vw, 7rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              lineHeight: 1,
+              textTransform: 'uppercase',
+              color: 'var(--white)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Shahd Khairy
+          </h1>
+          <div
+            className="boot__wipe"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: '#D2BDF8',
+              transform: 'scaleX(0)',
+              zIndex: 2,
+            }}
+          />
+        </div>
+
+        {/* Role — mono, typed on */}
         <div
-          className="forge__wordmark"
           style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: '0.55em',
-            fontSize: '1.7rem',
-            color: 'var(--white)',
+            fontFamily: MONO,
+            fontSize: '1.3rem',
+            letterSpacing: '0.38em',
+            color: 'rgba(180, 195, 217, 0.85)',
             textTransform: 'uppercase',
-            overflow: 'hidden',
+            display: 'flex',
           }}
         >
-          <span style={{ fontWeight: 800, letterSpacing: '0.14em', display: 'inline-flex' }}>
-            {'SHAHD'.split('').map((c, i) => (
-              <span key={i} className="forge-letter" style={{ display: 'inline-block' }}>{c}</span>
-            ))}
-          </span>
-          <span style={{ fontWeight: 300, letterSpacing: '0.24em', opacity: 0.85, display: 'inline-flex' }}>
-            {'KHAIRY'.split('').map((c, i) => (
-              <span key={i} className="forge-letter" style={{ display: 'inline-block' }}>{c}</span>
-            ))}
-          </span>
+          {'FULL STACK DEVELOPER'.split('').map((c, i) => (
+            <span key={i} className="boot__role" style={{ opacity: 0, whiteSpace: 'pre' }}>{c}</span>
+          ))}
         </div>
       </div>
-
-      {/* The star */}
-      <div className="forge__star" style={{ position: 'relative', willChange: 'transform', filter: 'drop-shadow(0 0 3rem rgba(210, 189, 248, 0.55))', opacity: 0 }}>
-        <Star size="14rem" color="#D2BDF8" />
-      </div>
-
-      {/* Top-left identity label */}
-      <div
-        className="forge__label"
-        style={{
-          position: 'absolute',
-          top: '4rem',
-          left: '4rem',
-          fontSize: '1.5rem',
-          fontWeight: 600,
-          letterSpacing: '0.14em',
-          color: 'var(--gray)',
-          overflow: 'hidden',
-        }}
-      >
-        {label1.split('').map((c, i) => (
-          <span key={i} className="forge-letter" style={{ display: 'inline-block', whiteSpace: 'pre' }}>{c}</span>
-        ))}
-      </div>
-
-      {/* Bottom-left label */}
-      <div
-        className="forge__label"
-        style={{
-          position: 'absolute',
-          bottom: '4rem',
-          left: '4rem',
-          fontSize: '1.5rem',
-          fontWeight: 600,
-          letterSpacing: '0.14em',
-          color: 'var(--gray)',
-          overflow: 'hidden',
-        }}
-      >
-        {label2.split('').map((c, i) => (
-          <span key={i} className="forge-letter" style={{ display: 'inline-block', whiteSpace: 'pre' }}>{c}</span>
-        ))}
-      </div>
-
-      {/* Giant rolling counter — bottom right */}
-      <div
-        className="forge__counter"
-        style={{
-          position: 'absolute',
-          bottom: '2.5rem',
-          right: '4rem',
-          display: 'flex',
-          alignItems: 'baseline',
-          fontSize: 'clamp(8rem, 14vw, 17rem)',
-          fontWeight: 500,
-          letterSpacing: '-0.05em',
-          lineHeight: 1,
-          color: 'var(--gray)',
-          opacity: 0,
-        }}
-      >
-        <DigitColumn colRef={(el) => { hundredsRef.current = el; }} chars={[' ', '1']} />
-        <DigitColumn colRef={(el) => { tensRef.current = el; }} chars={DIGITS} />
-        <DigitColumn colRef={(el) => { onesRef.current = el; }} chars={DIGITS} />
-        <span style={{ fontSize: '0.35em', fontWeight: 600, marginLeft: '0.8rem', color: 'var(--pink)' }}>%</span>
-      </div>
-
-      {/* Bottom progress hairline */}
-      <div
-        className="forge__bar"
-        style={{
-          position: 'absolute',
-          left: 0,
-          bottom: 0,
-          width: '100%',
-          height: '2px',
-          transformOrigin: 'left center',
-          transform: 'scaleX(0)',
-          background: 'linear-gradient(90deg, var(--sky), var(--pink))',
-        }}
-      />
-
-      {/* Detonation flash */}
-      <div
-        className="forge__flash"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: 0,
-          background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95) 0%, rgba(210,189,248,0.6) 40%, transparent 75%)',
-          pointerEvents: 'none',
-        }}
-      />
     </div>
   );
 }
