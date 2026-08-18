@@ -36,53 +36,84 @@ const freelancerItems = [
   'Headaches',
 ];
 
-const swapLabels = ['BAGS', 'IDEAS'];
+const TOTAL = shahdItems.length; // 11
 
 export default function CompareSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const counterRef = useRef<HTMLSpanElement>(null);
-  const [swapIdx, setSwapIdx] = useState(0);
-  const [activeRow, setActiveRow] = useState<number | null>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const leftHalfRef = useRef<HTMLDivElement>(null);
+  const rightHalfRef = useRef<HTMLDivElement>(null);
+  const [activeRow, setActiveRow] = useState<number>(0);
   const [hoverRow, setHoverRow] = useState<number | null>(null);
 
   useGSAP(() => {
-    // Scroll-driven row activation: the row pair crossing viewport center
-    // becomes the highlighted one.
+    // === Row activation, 1:1 synced with scroll ===
+    // Each of the 11 row pairs owns an equal slice of the scroll through the
+    // grid; the badge number IS the active row index.
     const rows = gsap.utils.toArray<HTMLElement>('.compare__row--left');
     rows.forEach((row, idx) => {
       ScrollTrigger.create({
         trigger: row,
-        start: 'center-=80 center',
-        end: 'center+=170 center',
+        start: 'center-=60 center',
+        end: 'center+=160 center',
         onEnter: () => setActiveRow(idx),
         onEnterBack: () => setActiveRow(idx),
       });
     });
 
-    // Badge counter counts 28 -> 99 while scrolling through the lists
-    // (same range as the original), and the label flips BAGS -> IDEAS.
-    const counterState = { value: 28 };
-    gsap.to(counterState, {
-      value: 99,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: 'top 70%',
-        end: 'bottom bottom',
-        scrub: 1,
-        onUpdate: (self) => {
-          setSwapIdx(self.progress > 0.5 ? 1 : 0);
-        },
-      },
-      onUpdate: () => {
-        if (counterRef.current) {
-          counterRef.current.textContent = String(Math.round(counterState.value));
-        }
-      },
+    // === Zip effect: badge shrinks while scrolling, springs back on stop ===
+    const badge = badgeRef.current;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+    const onScroll = () => {
+      if (!badge) return;
+      gsap.to(badge, { scale: 0.82, duration: 0.25, ease: 'power2.out', overwrite: 'auto' });
+      if (settleTimer) clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => {
+        gsap.to(badge, { scale: 1, duration: 0.9, ease: 'elastic.out(1, 0.35)', overwrite: 'auto' });
+      }, 140);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Gentle idle float so the badge always feels alive
+    gsap.to('.compare__badge-inner', {
+      y: '-0.6rem',
+      duration: 1.8,
+      yoyo: true,
+      repeat: -1,
+      ease: 'sine.inOut',
     });
+
+    // === 3D fold: halves tilt toward the seam, mouse adds micro-parallax ===
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (isDesktop) {
+      gsap.set(leftHalfRef.current, { rotateY: 7, transformOrigin: 'right center' });
+      gsap.set(rightHalfRef.current, { rotateY: -7, transformOrigin: 'left center' });
+
+      const grid = document.querySelector<HTMLElement>('.compare-grid');
+      const handleMove = (e: MouseEvent) => {
+        if (!grid) return;
+        const rect = grid.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        gsap.to(leftHalfRef.current, { rotateY: 7 + px * 3, rotateX: -py * 3, duration: 0.6, ease: 'power2.out' });
+        gsap.to(rightHalfRef.current, { rotateY: -7 + px * 3, rotateX: -py * 3, duration: 0.6, ease: 'power2.out' });
+      };
+      const handleLeave = () => {
+        gsap.to(leftHalfRef.current, { rotateY: 7, rotateX: 0, duration: 0.8, ease: 'power2.out' });
+        gsap.to(rightHalfRef.current, { rotateY: -7, rotateX: 0, duration: 0.8, ease: 'power2.out' });
+      };
+      grid?.addEventListener('mousemove', handleMove);
+      grid?.addEventListener('mouseleave', handleLeave);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (settleTimer) clearTimeout(settleTimer);
+    };
   }, { scope: sectionRef });
 
   const highlight = hoverRow ?? activeRow;
+  const shown = (hoverRow ?? activeRow) + 1;
 
   const rowStyle = (idx: number, side: 'left' | 'right'): React.CSSProperties => ({
     fontSize: highlight === idx ? 'clamp(2.4rem, 2.8vw, 3.6rem)' : 'clamp(1.9rem, 2.1vw, 2.6rem)',
@@ -93,8 +124,9 @@ export default function CompareSection() {
     padding: '1.8rem 0',
     textAlign: side === 'left' ? 'right' : 'left',
     cursor: 'pointer',
-    opacity: highlight === null || highlight === idx ? 1 : 0.45,
-    transition: 'all 0.25s ease',
+    opacity: highlight === idx ? 1 : 0.45,
+    transform: highlight === idx ? 'translateZ(3.5rem)' : 'translateZ(0)',
+    transition: 'all 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
   });
 
   return (
@@ -125,20 +157,20 @@ export default function CompareSection() {
           }}
         />
 
-        {/* One split card: blue half (SHAHD) / lavender half (FREELANCER),
-            rows anchored toward the center seam, side labels at the edges,
-            dark circular counter badge riding the seam. */}
-        <div className="compare-grid" style={{ position: 'relative' }}>
+        {/* Split card with 3D fold + zip badge on the seam */}
+        <div className="compare-grid" style={{ position: 'relative', perspective: '160rem' }}>
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '0.6rem',
+              transformStyle: 'preserve-3d',
             }}
             className="compare-grid__inner"
           >
             {/* Left half: SHAHD */}
             <div
+              ref={leftHalfRef}
               className="compare__half"
               style={{
                 background: 'linear-gradient(180deg, #94bdf7 0%, #a8c4f8 100%)',
@@ -148,6 +180,9 @@ export default function CompareSection() {
                 display: 'grid',
                 gridTemplateColumns: '10rem 1fr',
                 alignItems: 'center',
+                transformStyle: 'preserve-3d',
+                boxShadow: '0 3rem 8rem rgba(0,0,0,0.45)',
+                willChange: 'transform',
               }}
             >
               <div
@@ -160,7 +195,7 @@ export default function CompareSection() {
               >
                 SHAHD
               </div>
-              <div style={{ paddingRight: '10rem' }}>
+              <div style={{ paddingRight: '10rem', transformStyle: 'preserve-3d' }}>
                 {shahdItems.map((item, idx) => (
                   <div
                     key={item}
@@ -177,6 +212,7 @@ export default function CompareSection() {
 
             {/* Right half: FREELANCER */}
             <div
+              ref={rightHalfRef}
               className="compare__half"
               style={{
                 background: 'linear-gradient(180deg, #d4bdf8 0%, #cdb2f6 100%)',
@@ -186,9 +222,12 @@ export default function CompareSection() {
                 display: 'grid',
                 gridTemplateColumns: '1fr 10rem',
                 alignItems: 'center',
+                transformStyle: 'preserve-3d',
+                boxShadow: '0 3rem 8rem rgba(0,0,0,0.45)',
+                willChange: 'transform',
               }}
             >
-              <div style={{ paddingLeft: '10rem' }}>
+              <div style={{ paddingLeft: '10rem', transformStyle: 'preserve-3d' }}>
                 {freelancerItems.map((item, idx) => (
                   <div
                     key={item}
@@ -214,7 +253,8 @@ export default function CompareSection() {
             </div>
           </div>
 
-          {/* Center counter badge — sticky, riding the seam */}
+          {/* Zip badge — small, alive, riding the seam. The number IS the
+              active advantage index, perfectly synced with the scroll. */}
           <div
             className="compare__badge-col"
             style={{
@@ -227,46 +267,73 @@ export default function CompareSection() {
               pointerEvents: 'none',
             }}
           >
-            <div
-              style={{
-                position: 'sticky',
-                top: 'calc(50vh - 9.5rem)',
-                width: '19rem',
-                height: '19rem',
-                borderRadius: '50%',
-                backgroundColor: '#141416',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 1.5rem 4rem rgba(0, 0, 0, 0.5)',
-              }}
-            >
-              <span 
-                style={{ 
-                  fontSize: '1.5rem', 
-                  fontWeight: 700, 
-                  letterSpacing: '0.08em', 
-                  color: 'var(--gray)',
-                  textTransform: 'uppercase',
-                  marginBottom: '0.2rem',
-                  transition: 'opacity 0.2s ease',
-                }}
+            <div style={{ position: 'sticky', top: 'calc(50vh - 6.5rem)' }}>
+              <div
+                ref={badgeRef}
+                style={{ willChange: 'transform' }}
               >
-                {swapLabels[swapIdx]}
-              </span>
-              <span 
-                ref={counterRef}
-                style={{ 
-                  fontSize: '6.8rem', 
-                  fontWeight: 500, 
-                  lineHeight: 1, 
-                  color: 'var(--gray)',
-                  letterSpacing: '-0.03em',
-                }}
-              >
-                28
-              </span>
+                <div
+                  className="compare__badge-inner"
+                  style={{
+                    width: '13rem',
+                    height: '13rem',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(16, 16, 20, 0.92)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.2rem',
+                    boxShadow: '0 1.5rem 5rem rgba(0, 0, 0, 0.6), inset 0 0 3rem rgba(148, 189, 247, 0.08)',
+                  }}
+                >
+                  <span 
+                    style={{ 
+                      fontSize: '1.1rem', 
+                      fontWeight: 700, 
+                      letterSpacing: '0.14em', 
+                      color: 'var(--gray)',
+                      textTransform: 'uppercase',
+                      opacity: 0.7,
+                    }}
+                  >
+                    ADVANTAGE
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem', lineHeight: 1 }}>
+                    <span 
+                      style={{ 
+                        fontSize: '4.4rem', 
+                        fontWeight: 600, 
+                        color: 'var(--white)',
+                        letterSpacing: '-0.03em',
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      {String(shown).padStart(2, '0')}
+                    </span>
+                    <span style={{ fontSize: '1.6rem', fontWeight: 600, color: 'var(--sky)' }}>
+                      /{TOTAL}
+                    </span>
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      color: 'var(--pink)',
+                      letterSpacing: '0.04em',
+                      maxWidth: '10rem',
+                      textAlign: 'center',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {shahdItems[highlight ?? 0]}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
